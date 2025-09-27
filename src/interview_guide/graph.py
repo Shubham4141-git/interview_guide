@@ -15,6 +15,145 @@ from .configuration import settings
 
 from .storage import new_session, add_scores, get_questions
 
+_SKILL_FEW_SHOT_EXAMPLE = (
+    "REFERENCE ONLY — match tone and depth, but DO NOT reuse these exact questions:\n"
+    "Skill: Decision Tree\n"
+    "1. What is a decision tree and how do you detect when it is overfitting in production?\n"
+    "2. Explain how you select a split criterion when the classes are heavily imbalanced.\n"
+    "3. Compare a single decision tree with XGBoost — when would you ship the simpler model?\n"
+    "\n"
+    "Skill: Python\n"
+    "1. What is the difference between == and is in Python?\n"
+    "2. Explain the concept of list comprehensions and when you would use them.\n"
+    "3. How does Python's garbage collection work?\n"
+    "4. What are Python generators and how do they differ from regular functions?\n"
+    "5. Describe the difference between *args and **kwargs.\n"
+    "\n"
+    "Skill: JavaScript\n"
+    "6. What is the difference between let, const, and var?\n"
+    "7. Explain event bubbling and event capturing in JavaScript.\n"
+    "8. How do closures work in JavaScript? Provide an example scenario where they're useful.\n"
+    "9. What is the difference between == and === in JavaScript?\n"
+    "10. Describe how asynchronous programming works with Promises and async/await.\n"
+    "\n"
+    "Skill: SQL\n"
+    "11. Write a query to find duplicate records in a table.\n"
+    "12. Explain the difference between clustered and non-clustered indexes.\n"
+    "13. How would you optimize a slow-performing SQL query?\n"
+    "14. What is a database transaction and what are ACID properties?\n"
+    "15. How do you handle NULL values in SQL queries?\n"
+    "\n"
+    "Skill: Docker\n"
+    "16. How would you reduce the size of a Docker image?\n"
+    "17. Explain the difference between COPY and ADD commands in a Dockerfile.\n"
+    "18. How do you debug issues in a running Docker container?\n"
+    "19. What is the purpose of a .dockerignore file?\n"
+    "20. How would you handle logging in containerized applications?\n"
+    "\n"
+    "Skill: Kubernetes\n"
+    "21. How do you troubleshoot a pod that's stuck in Pending state?\n"
+    "22. Explain the difference between ConfigMaps and Secrets.\n"
+    "23. How would you implement rolling updates for a deployment?\n"
+    "24. What are Ingress controllers and how do they work?\n"
+    "25. How do you monitor resource usage across your Kubernetes cluster?\n"
+    "\n"
+    "Skill: AWS\n"
+    "26. What's the difference between S3 storage classes?\n"
+    "27. How would you design a highly available architecture using AWS services?\n"
+    "28. Explain the difference between Application Load Balancer and Network Load Balancer.\n"
+    "29. How do you secure data in transit and at rest in AWS?\n"
+    "30. What strategies would you use for cost optimization in AWS?\n"
+    "\n"
+    "Skill: System Design\n"
+    "31. How would you design a URL shortener like bit.ly?\n"
+    "32. Design a chat application that can handle millions of users.\n"
+    "33. How would you implement a distributed cache?\n"
+    "34. Design a rate limiting system for an API.\n"
+    "35. How would you handle data consistency in a microservices architecture?\n"
+    "\n"
+    "Skill: Git\n"
+    "36. What's the difference between git merge and git rebase?\n"
+    "37. How do you resolve merge conflicts in Git?\n"
+    "38. Explain Git branching strategies for a team environment.\n"
+    "39. How would you undo the last commit in Git?\n"
+    "40. What is the difference between git pull and git fetch?\n"
+    "\n"
+    "Skill: Linux / DevOps\n"
+    "41. How do you check system performance and identify bottlenecks?\n"
+    "42. Explain the difference between soft and hard links in Linux.\n"
+    "43. How would you set up automated backups for a database server?\n"
+    "44. What are the different types of load balancing algorithms?\n"
+    "45. How do you implement a blue-green deployment strategy?\n"
+    "\n"
+    "Skill: API Design / REST\n"
+    "46. What are the principles of REST API design?\n"
+    "47. How do you version your APIs?\n"
+    "48. Explain different HTTP status codes and when to use them.\n"
+    "49. How would you implement authentication and authorization in APIs?\n"
+    "50. What's the difference between GraphQL and REST APIs?\n"
+)
+
+_SOFT_SKILL_STOPWORDS = {
+    "communication",
+    "collaboration",
+    "collaborative",
+    "teamwork",
+    "team player",
+    "leadership",
+    "stakeholder management",
+    "stakeholder",
+    "presentation",
+    "negotiation",
+    "problem solving",
+    "problem-solving",
+    "adaptability",
+    "adaptable",
+    "time management",
+    "organizational",
+    "organization",
+    "empathy",
+    "interpersonal",
+    "communication skills",
+    "written communication",
+    "verbal communication",
+    "people management",
+    "mentoring",
+    "coaching",
+}
+
+
+def _filter_technical_skills(skills: list[str]) -> list[str]:
+    """Drop skills that look like soft skills using a simple stopword list."""
+    out: list[str] = []
+    for skill in skills:
+        low = skill.strip().lower()
+        if not low:
+            continue
+        if any(stop in low for stop in _SOFT_SKILL_STOPWORDS):
+            continue
+        out.append(skill)
+    return out
+
+
+def _build_skill_topic(skill: str, n: int) -> str:
+    """Create a reusable few-shot topic string focused strictly on a skill."""
+    intro = (
+        f"SKILL TARGET: {skill}\n"
+        "You are a senior practitioner conducting a technical interview.\n"
+        "Stay strictly on this skill — no unrelated tools, teams, or HR chatter.\n"
+    )
+    guidance = (
+        "Probe mechanics, workflows, trade-offs, and how the candidate applies the skill.\n"
+        "Blend definition checks with real project scenarios. Keep each question concise.\n"
+        "Do not provide answers. Each question must stand alone.\n"
+        "Generate fresh questions — do NOT repeat any examples shown in the reference bank.\n"
+    )
+    request = (
+        f"Generate {n} high-signal interview questions (target 3–4) that test concrete ability with {skill}.\n"
+        "Assume the candidate has hands-on experience and challenge them accordingly.\n"
+    )
+    return "\n".join([intro, guidance, _SKILL_FEW_SHOT_EXAMPLE.strip(), request]).strip()
+
 # Helper to deduplicate questions while preserving order
 def _dedup_qs(qs: list[Dict[str, Any]]) -> list[Dict[str, Any]]:
     seen = set()
@@ -146,155 +285,65 @@ def qgen_from_jd(state: GraphState) -> GraphState:
         return state
 
     # Save some of the profile to state for visibility
-    state["skills"] = list(getattr(profile, "skills", []) or [])
-    state["themes"] = list(getattr(profile, "themes", []) or [])
+    skills_all = list(getattr(profile, "skills", []) or [])
+    skills_all = _filter_technical_skills(skills_all)
+    state["skills"] = list(skills_all)
+    state["themes"] = []
 
-    # Plan total questions across *themes*, picking concrete *tasks* for prompts
-    total_cap = max(5, int(getattr(settings, "total_questions_from_jd", 10)))
-    weights: Dict[str, float] = dict(getattr(profile, "weights_by_theme", {}) or {})
+    base_target = max(5, int(getattr(settings, "total_questions_from_jd", 10)))
+    per_skill_target = 4 if base_target >= 4 else max(3, base_target)
 
-    # If no weights, distribute evenly across themes; if no themes, default to General
-    themes = list(weights.keys()) or (list(getattr(profile, "themes", []) or []) or ["General"])
-    if not weights:
-        w = round(1.0 / max(1, len(themes)), 4)
-        weights = {t: w for t in themes}
-
-    # Round-robin allocation by weights
     import math
-    alloc = {t: 0 for t in themes}
-    leftover = total_cap
-    for t in themes:
-        k = int(math.floor(weights.get(t, 0.0) * total_cap))
-        alloc[t] = k
-        leftover -= k
-    if leftover > 0:
-        for t in sorted(themes, key=lambda x: weights.get(x, 0.0), reverse=True):
-            if leftover <= 0:
-                break
-            alloc[t] += 1
-            leftover -= 1
 
-    # Build task buckets per theme from profile.tasks (simple keyword overlap assignment)
-    tasks = list(getattr(profile, "tasks", []) or [])
-    buckets: Dict[str, list[str]] = {t: [] for t in themes}
-    for task in tasks:
-        low = task.lower()
-        best_t = None
-        best_score = 0
-        for th in themes:
-            score = 0
-            for w in th.lower().split():
-                if w and w in low:
-                    score += 1
-            if score > best_score:
-                best_score = score
-                best_t = th
-        if best_t is None:
-            best_t = max(themes, key=lambda x: weights.get(x, 0.0))
-        buckets[best_t].append(task)
+    selected_skills: list[str] = []
+    if skills_all:
+        target_skill_count = max(1, math.ceil(len(skills_all) * 0.5))
+        selected_skills = skills_all[:target_skill_count]
 
-    # If no tasks, fall back to skills as prompts
-    use_skills = False
-    if all(len(v) == 0 for v in buckets.values()):
-        use_skills = True
-        skills = list(getattr(profile, "skills", []) or [])
-        for i, sk in enumerate(skills):
-            buckets[themes[i % len(themes)]].append(sk)
+    desired_total = len(selected_skills) * per_skill_target if selected_skills else base_target
 
-    # Generate questions batched per theme (1 LLM call per theme)
-    all_qs: list[Dict[str, Any]] = []
-    for th in themes:
-        need = alloc.get(th, 0)
-        if need <= 0:
-            continue
-        items = buckets.get(th, [])
-        if not items:
-            continue
-        # keep a few distinct items to steer the questions
-        seen_local = set()
-        focus_items = []
-        for it in items:
-            k = it.strip().lower()
-            if not k or k in seen_local:
-                continue
-            seen_local.add(k)
-            focus_items.append(it)
-            if len(focus_items) >= max(3, min(5, need)):
-                break
+    questions: list[Dict[str, Any]] = []
 
-        role = getattr(profile, "role", None) or ""
-        subs = ", ".join((getattr(profile, "subroles", []) or [])[:1])
-        ctx_bits = [th]
-        if role:
-            ctx_bits.append(role)
-        if subs:
-            ctx_bits.append(subs)
-        context_str = " | ".join([c for c in ctx_bits if c])
-
-        # Build a single topic string that lists focus items
-        topic = f"{th} — focus on: " + "; ".join(focus_items)
-        topic = topic + f" — context: {context_str}" if context_str else topic
-
-        sk_slots = dict(slots)
-        sk_slots["topic"] = topic
+    for skill in selected_skills:
+        if len(questions) >= desired_total:
+            break
+        need = per_skill_target
+        topic = _build_skill_topic(skill, need)
+        skill_slots = dict(slots)
+        skill_slots["topic"] = topic
+        skill_slots["n"] = str(need)
         try:
-            qs = generate_from_topic(sk_slots, n=need)
+            qs = generate_from_topic(skill_slots, n=need)
         except Exception:
             qs = []
-        if qs:
-            all_qs.extend(qs)
-        if len(all_qs) >= total_cap:
-            break
+        if not qs:
+            continue
+        # annotate with skill for traceability
+        for q in qs[:need]:
+            q.setdefault("meta", {})
+            if isinstance(q["meta"], dict):
+                q["meta"].setdefault("skill", skill)
+        questions.extend(qs[:need])
 
-    # First pass questions
-    state["questions"] = all_qs[:total_cap]
+    # If no skills detected or generation failed, fall back to a generic topic using JD text
+    if not questions:
+        jd_text = (slots.get("jd_text") or "").strip()
+        fallback_topic = (
+            "Generate practical interview questions for this job description.\n"
+            "Focus on key skills and responsibilities mentioned.\n"
+            f"JD snippet: {jd_text[:500]}"
+        )
+        fallback_slots = dict(slots)
+        fallback_slots["topic"] = fallback_topic
+        fallback_slots["n"] = str(base_target)
+        try:
+            fallback = generate_from_topic(fallback_slots, n=base_target)
+        except Exception:
+            fallback = []
+        questions.extend(fallback[:base_target])
 
-    # Top-up: if we allocated to empty themes, reuse the richest bucket to reach the cap
-    if len(state["questions"]) < total_cap:
-        remaining = total_cap - len(state["questions"])
-        # pick the theme with the most items
-        richest = None
-        max_items = 0
-        for th in themes:
-            n = len(buckets.get(th, []))
-            if n > max_items:
-                max_items = n
-                richest = th
-        if richest and max_items > 0:
-            # build a focused topic for the richest theme
-            seen_local = set()
-            focus_items = []
-            for it in buckets[richest]:
-                k = it.strip().lower()
-                if not k or k in seen_local:
-                    continue
-                seen_local.add(k)
-                focus_items.append(it)
-                if len(focus_items) >= min(5, remaining):
-                    break
-            role = getattr(profile, "role", None) or ""
-            subs = ", ".join((getattr(profile, "subroles", []) or [])[:1])
-            ctx_bits = [richest]
-            if role:
-                ctx_bits.append(role)
-            if subs:
-                ctx_bits.append(subs)
-            context_str = " | ".join([c for c in ctx_bits if c])
-            topic = f"{richest} — focus on: " + "; ".join(focus_items)
-            topic = topic + f" — context: {context_str}" if context_str else topic
-
-            sk_slots = dict(slots)
-            sk_slots["topic"] = topic
-            try:
-                extra = generate_from_topic(sk_slots, n=remaining)
-            except Exception:
-                extra = []
-            if extra:
-                state["questions"].extend(extra[:remaining])
-                state["questions"] = state["questions"][:total_cap]
-
-    # De-duplicate questions while preserving order
-    state["questions"] = _dedup_qs(state["questions"])[:total_cap]
+    final_cap = desired_total if selected_skills else base_target
+    state["questions"] = _dedup_qs(questions)[:final_cap]
 
     # Persist to the current session if available
     session_id = state.get("session_id")
@@ -309,7 +358,10 @@ def qgen_from_jd(state: GraphState) -> GraphState:
     if not state["questions"]:
         state["result"] = "[QGEN_FROM_JD] No questions could be generated from this JD."
     else:
-        state["result"] = f"Generated {len(state['questions'])} questions across {len(themes)} theme(s)"
+        used_skills = selected_skills if selected_skills else ["general prompts"]
+        state["result"] = (
+            f"Generated {len(state['questions'])} questions across {len(used_skills)} skill focus area(s)"
+        )
     return state
 
 def qgen_topic(state: GraphState) -> GraphState:

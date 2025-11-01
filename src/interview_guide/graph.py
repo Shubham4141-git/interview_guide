@@ -1,5 +1,5 @@
 import os
-from typing import TypedDict, Optional, Dict, Any
+from typing import TypedDict, Optional, Dict, Any, List
 from langgraph.graph import StateGraph, END
 from .router import classify
 from .intents import Intent, IntentType
@@ -9,6 +9,7 @@ from .agents.jd_parser import extract_profile_from_slots
 from .agents.evaluator import evaluate_from_slots
 from .agents.profile import summarize_profile
 from .agents.jd_fetcher import fetch_jd_from_url
+from .agents.skill_clusterer import cluster_skills
 from .storage import add_questions
 from .storage.prefs import set_prefs, get_prefs
 from .configuration import settings
@@ -135,21 +136,67 @@ def _filter_technical_skills(skills: list[str]) -> list[str]:
     return out
 
 
-def _build_skill_topic(skill: str, n: int) -> str:
-    """Create a reusable few-shot topic string focused strictly on a skill."""
+def _build_skill_topic(skills: List[str], n: int) -> str:
+    """Create a reusable few-shot topic string focused strictly on listed skills."""
+    if not skills:
+        raise ValueError("_build_skill_topic requires at least one skill")
+    skill_title = " / ".join(skills)
+    bullet_lines = "\n".join(f"- {s}" for s in skills)
     intro = (
-        f"SKILL TARGET: {skill}\n"
+        f"SKILL TARGETS: {skill_title}\n"
         "You are a senior practitioner conducting a technical interview.\n"
-        "Stay strictly on this skill — no unrelated tools, teams, or HR chatter.\n"
+        "Stay strictly on these skills — no unrelated tools, teams, or HR chatter.\n"
     )
+    # guidance = (
+    #     "Probe mechanics, workflows, trade-offs, and how the candidate applies the skill.\n"
+    #     "Alternate between quick knowledge checks and deeper follow-ups.\n"
+    #     "At least half the questions should be direct (definition, mechanism, difference).\n"
+    #     "Limit scenario-based questions to at most one per batch and avoid phrases like 'Describe a scenario' or 'Describe a situation'.\n"
+    #     "Ensure question stems are unique; do not reuse the same opening phrase across the batch.\n"
+    #     "Cover varied angles: include definition/mechanism, implementation/how-to, troubleshooting/debugging, and optimization/best-practice views where possible.\n"
+    #     "Favor concise stems such as 'What', 'How does', 'Why', 'When would', or 'Explain'.\n"
+    #     "Keep each question concise. Do not provide answers.\n"
+    #     "Generate fresh questions — do NOT repeat any examples shown in the reference bank.\n"
+    #     "Ensure every question references at least one of the target skills listed below.\n"
+    # )
+    
     guidance = (
-        "Probe mechanics, workflows, trade-offs, and how the candidate applies the skill.\n"
-        "Blend definition checks with real project scenarios. Keep each question concise.\n"
-        "Do not provide answers. Each question must stand alone.\n"
-        "Generate fresh questions — do NOT repeat any examples shown in the reference bank.\n"
+    "Generate direct technical questions that test specific knowledge and understanding of the target skills. "
+    "Focus on concise, pointed questions that can be answered clearly and demonstrate expertise.\n\n"
+    
+    "QUESTION STYLE - PRIORITIZE DIRECT QUESTIONS:\n"
+    "• Use short, specific question stems that get straight to the point\n"
+    "• Focus on facts, definitions, mechanisms, purposes, and comparisons\n"
+    "• Avoid lengthy setups, scenarios, or multi-part questions\n"
+    "• Each question should test one clear concept or piece of knowledge\n\n"
+    
+    # "PREFERRED QUESTION PATTERNS (use varied stems):\n"
+    # "• 'What is...', 'What does...', 'What happens...'\n"
+    # "• 'How does...', 'How would...', 'How can...'\n"
+    # "• 'Why does...', 'Why would...', 'Why is...'\n"
+    # "• 'When should...', 'When would...', 'When is...'\n"
+    # "• 'Which parameter...', 'Which method...', 'Which approach...'\n"
+    # "• 'What causes...', 'What determines...', 'What distinguishes...'\n"
+    # "• 'Name the...', 'List the...', 'Identify the...'\n\n"
+    
+    "CONTENT FOCUS:\n"
+    "• 80% should be direct knowledge questions: definitions, mechanisms, purposes, key differences\n"
+    "• 20% can be implementation or troubleshooting questions (but keep them direct)\n"
+    "• Test understanding of core concepts, parameters, methods, and technical distinctions\n"
+    "• Include questions about when to use certain approaches or what specific components do\n\n"
+    
+    "STRICT RULES:\n"
+    "• Every question stem must be unique - no repeated opening phrases in a batch\n"
+    "• Do not repeat the same technical concept multiple times\n"
+    "• Avoid: 'Explain the process...', 'Walk through...', 'Describe the architecture...', 'Describe a scenario...'\n"
+    "• Keep questions short and focused\n"
+    "• Never copy provided example questions\n"
+    "• Each question must reference specific target skills"
     )
+    
     request = (
-        f"Generate {n} high-signal interview questions (target 3–4) that test concrete ability with {skill}.\n"
+        f"Target skill list:\n{bullet_lines}\n"
+        f"Generate {n} high-signal interview questions (target 3–4) that test concrete ability with these skills.\n"
         "Assume the candidate has hands-on experience and challenge them accordingly.\n"
     )
     return "\n".join([intro, guidance, _SKILL_FEW_SHOT_EXAMPLE.strip(), request]).strip()
@@ -193,6 +240,7 @@ class GraphState(TypedDict, total=False):
     questions: list[Dict[str, Any]]
     resources: list[Dict[str, Any]]
     skills: list[str]
+    skill_groups: List[List[str]]
     themes: list[str]
     scores: list[Dict[str, Any]]
     profile: Dict[str, Any]
@@ -290,40 +338,45 @@ def qgen_from_jd(state: GraphState) -> GraphState:
     state["skills"] = list(skills_all)
     state["themes"] = []
 
+    skill_groups = cluster_skills(skills_all) if skills_all else []
+    state["skill_groups"] = [list(g) for g in skill_groups]
+
     base_target = max(5, int(getattr(settings, "total_questions_from_jd", 10)))
-    per_skill_target = 4 if base_target >= 4 else max(3, base_target)
-
-    import math
-
-    selected_skills: list[str] = []
-    if skills_all:
-        target_skill_count = max(1, math.ceil(len(skills_all) * 0.5))
-        selected_skills = skills_all[:target_skill_count]
-
-    desired_total = len(selected_skills) * per_skill_target if selected_skills else base_target
-
     questions: list[Dict[str, Any]] = []
+    desired_total = base_target
 
-    for skill in selected_skills:
-        if len(questions) >= desired_total:
-            break
-        need = per_skill_target
-        topic = _build_skill_topic(skill, need)
-        skill_slots = dict(slots)
-        skill_slots["topic"] = topic
-        skill_slots["n"] = str(need)
-        try:
-            qs = generate_from_topic(skill_slots, n=need)
-        except Exception:
-            qs = []
-        if not qs:
-            continue
-        # annotate with skill for traceability
-        for q in qs[:need]:
-            q.setdefault("meta", {})
-            if isinstance(q["meta"], dict):
-                q["meta"].setdefault("skill", skill)
-        questions.extend(qs[:need])
+    if skill_groups:
+        group_alloc = [1 for _ in skill_groups]
+        total_alloc = sum(group_alloc)
+        idx = 0
+        while total_alloc < base_target:
+            if group_alloc[idx] < 4:
+                group_alloc[idx] += 1
+                total_alloc += 1
+            idx = (idx + 1) % len(group_alloc)
+            if idx == 0 and all(a >= 4 for a in group_alloc):
+                break
+        desired_total = max(base_target, total_alloc)
+
+        for g_idx, group in enumerate(skill_groups):
+            if len(questions) >= desired_total:
+                break
+            need = group_alloc[g_idx]
+            topic = _build_skill_topic(group, need)
+            skill_slots = dict(slots)
+            skill_slots["topic"] = topic
+            skill_slots["n"] = str(need)
+            try:
+                qs = generate_from_topic(skill_slots, n=need)
+            except Exception:
+                qs = []
+            if not qs:
+                continue
+            for q in qs[:need]:
+                q.setdefault("meta", {})
+                if isinstance(q["meta"], dict):
+                    q["meta"].setdefault("skill_group", list(group))
+            questions.extend(qs[:need])
 
     # If no skills detected or generation failed, fall back to a generic topic using JD text
     if not questions:
@@ -342,7 +395,7 @@ def qgen_from_jd(state: GraphState) -> GraphState:
             fallback = []
         questions.extend(fallback[:base_target])
 
-    final_cap = desired_total if selected_skills else base_target
+    final_cap = desired_total if skill_groups else base_target
     state["questions"] = _dedup_qs(questions)[:final_cap]
 
     # Persist to the current session if available
@@ -358,9 +411,12 @@ def qgen_from_jd(state: GraphState) -> GraphState:
     if not state["questions"]:
         state["result"] = "[QGEN_FROM_JD] No questions could be generated from this JD."
     else:
-        used_skills = selected_skills if selected_skills else ["general prompts"]
+        if skill_groups:
+            label = f"{len(skill_groups)} skill cluster(s)"
+        else:
+            label = "general prompts"
         state["result"] = (
-            f"Generated {len(state['questions'])} questions across {len(used_skills)} skill focus area(s)"
+            f"Generated {len(state['questions'])} questions across {label}"
         )
     return state
 

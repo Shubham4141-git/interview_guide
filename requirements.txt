@@ -7,3 +7,5 @@ requests
 beautifulsoup4
 pydantic
 python-dotenv
+sentence-transformers
+scikit-learn

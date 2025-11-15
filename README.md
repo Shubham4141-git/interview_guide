@@ -1,7 +1,7 @@
 # Interview Guide
 
 ## Overview
-Interview Guide is a comprehensive platform designed to streamline the interview preparation process. It provides functionalities including job description ingestion, automated question generation, answer evaluation, personalized resource recommendations, profile tracking, multi-user support, and user preferences management. The platform is accessible via an intuitive Streamlit-based user interface as well as a CLI-like mode for advanced usage.
+Interview Guide is a comprehensive platform designed to streamline the interview preparation process. It provides functionalities including job description ingestion, automated question generation, answer evaluation, personalized resource recommendations, profile tracking, multi-user support, and user preferences management. The platform can be accessed via a CLI-like mode or through the FastAPI backend described below.
 
 ## Features
 - Job Description (JD) ingestion for tailored interview preparation
@@ -10,7 +10,7 @@ Interview Guide is a comprehensive platform designed to streamline the interview
 - Personalized resource recommendations for skill enhancement
 - Profile tracking to monitor improvement over time
 - Multi-user support with user preferences management
-- Clean and interactive Streamlit UI for ease of use
+- Clean FastAPI backend for custom UI integration
 
 ## Architecture
 The project is organized into modular components under `src/interview_guide/`:
@@ -21,7 +21,7 @@ The project is organized into modular components under `src/interview_guide/`:
 - **Graph:** Handle knowledge graph operations and relationships.
 - **Router:** Manage routing of intents and requests.
 - **Intents:** Define user intents and corresponding actions.
-- **UI:** The user interface entry point is `app.py`, built with Streamlit.
+- **API:** FastAPI entry points live under `interview_guide.api`, exposing the orchestrated agent and all power tools.
 
 ## Setup
 
@@ -38,19 +38,22 @@ Create a `.env` file in the project root with the following environment variable
 ```
 GOOGLE_API_KEY=your_google_api_key_here
 TAVILY_API_KEY=your_tavily_api_key_here
+INTERVIEW_GUIDE_DB=interview_guide.db            # optional override of the SQLite path
 ```
 
 These API keys are required for accessing external services used in job description processing and other features.
 
 ## Running the Application
 
-### Streamlit UI Mode
+### Backend API Mode
 
-To launch the interactive Streamlit user interface, run:
+To launch the FastAPI backend (which powers the upcoming UI), run:
 
 ```bash
-uv run streamlit run app.py
+uv run uvicorn api_server:app --reload
 ```
+
+`api_server.py` ensures the `src/` directory is on `PYTHONPATH`, so no extra configuration is required. Once running, all endpoints are available under `http://localhost:8000/api`.
 
 ### CLI-like Mode
 
@@ -80,27 +83,36 @@ Once running, you can enter queries such as:
 
 These commands allow you to generate interview questions, ingest job descriptions, evaluate candidate answers, view your profile, and update your preferences respectively.
 
-### Streamlit UI Mode
+### Backend API Mode
 
-Launch the interactive user interface with:
+With the FastAPI server running, you can call endpoints directly. For example, to run a full agent turn:
 
 ```bash
-uv run streamlit run app.py
+curl -X POST http://127.0.0.1:8000/api/agent/execute \
+  -H "Content-Type: application/json" \
+  -d '{"query":"Give me resources for decision trees","user_id":"demo"}'
 ```
 
-Within the UI, you can enter queries in the textbox to perform various actions, including:
+Power-tool endpoints remain available for admin or automation workflows:
 
-- Job Description ingestion for personalized preparation
-- Generating interview questions based on job requirements
-- Evaluating candidate answers to track progress
-- Viewing your user profile and progress
-- Updating your preferences for recommended resources
-
-This intuitive interface enables seamless interaction with all core functionalities of the Interview Guide platform.
+- `POST /api/jd/fetch`
+- `POST /api/jd/profile`
+- `POST /api/questions`
+- `POST /api/evaluation`
+- `POST /api/profile/summary`
+- `POST /api/recommendations`
+- `POST /api/sessions`
+- `GET /api/sessions`
+- `GET /api/sessions/{id}/questions`
 
 ## Deployment
 
-This project can be deployed seamlessly on [Hugging Face Spaces](https://huggingface.co/spaces) to provide easy access and sharing. Simply upload the repository, ensure dependencies are listed, and configure environment variables in the Space settings.
+Deploy the backend to your preferred host (e.g., cloud VM, container service) using the FastAPI server. Typical steps:
+
+1. Ensure environment variables are set for API keys and database path.
+2. Install dependencies with `uv sync` (or bake them into a container image).
+3. Start the API with `uvicorn api_server:app --host 0.0.0.0 --port 8000`.
+4. Place the service behind your load balancer or gateway.
 
 ## Contributing
 

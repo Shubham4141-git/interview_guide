@@ -27,6 +27,8 @@ venv/
 *.db
 *.sqlite
 *.sqlite3
+*.db-shm
+*.db-wal
 
 # ── OS / Editor junk
 .DS_Store

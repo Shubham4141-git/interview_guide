@@ -9,12 +9,9 @@
   <body>
     <main class="page">
       <header class="hero">
-        <h1 class="hero__title">Interview Guide</h1>
-        <p class="hero__subtitle">Conversational AI built for interview prep.</p>
-        <div class="user-switch">
-          <label class="user-label" for="user-id">User</label>
-          <input id="user-id" class="user-input" type="text" value="demo" data-user />
-          <span class="user-hint">Use unique IDs to keep sessions separate.</span>
+        <div class="hero__content">
+          <h1 class="hero__title">Interview Guide</h1>
+          <p class="hero__subtitle">Conversational AI built for interview prep.</p>
         </div>
       </header>
 
@@ -43,6 +40,13 @@
         </div>
 
         <aside class="insights">
+          <div class="user-panel">
+            <div class="user-switch">
+              <label class="user-label" for="user-id">User</label>
+              <input id="user-id" class="user-input" type="text" value="demo" data-user />
+            </div>
+            <span class="user-hint">Use unique IDs to keep sessions separate.</span>
+          </div>
           <div class="insight-card" id="profile-card">
             <h3>Profile Snapshot</h3>
             <div class="insight-content" data-profile>Run an evaluation to see insights.</div>

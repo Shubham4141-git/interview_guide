@@ -1,7 +1,7 @@
 # Interview Guide
 
 ## Overview
-Interview Guide is a comprehensive platform designed to streamline the interview preparation process. It provides functionalities including job description ingestion, automated question generation, answer evaluation, personalized resource recommendations, profile tracking, multi-user support, and user preferences management. The platform can be accessed via a CLI-like mode or through the FastAPI backend described below.
+Interview Guide is a comprehensive platform designed to streamline the interview preparation process. It provides functionalities including job description ingestion, automated question generation, answer evaluation, personalized resource recommendations, profile tracking, multi-user support, and user preferences management. The platform can be accessed via a CLI-like mode or through the FastAPI backend described below. All backend code now lives inside the `backend/` directory to keep future frontend work separate.
 
 ## Features
 - Job Description (JD) ingestion for tailored interview preparation
@@ -13,7 +13,7 @@ Interview Guide is a comprehensive platform designed to streamline the interview
 - Clean FastAPI backend for custom UI integration
 
 ## Architecture
-The project is organized into modular components under `src/interview_guide/`:
+The backend is located inside `backend/`, with core modules under `backend/src/interview_guide/`:
 
 - **Agents:** Orchestrate workflows and coordinate interactions between components.
 - **Storage:** Manage user data, profiles, and session information.
@@ -25,15 +25,16 @@ The project is organized into modular components under `src/interview_guide/`:
 
 ## Setup
 
-Use the `uv` package manager to install dependencies and synchronize the environment:
+Use the `uv` package manager to install dependencies and synchronize the environment (run commands from the `backend/` directory):
 
 ```bash
+cd backend
 uv sync
 ```
 
 ## Configuration
 
-Create a `.env` file in the project root with the following environment variables:
+Create a `.env` file in the project root (or within `backend/`) with the following environment variables:
 
 ```
 GOOGLE_API_KEY=your_google_api_key_here
@@ -50,6 +51,7 @@ These API keys are required for accessing external services used in job descript
 To launch the FastAPI backend (which powers the upcoming UI), run:
 
 ```bash
+cd backend
 uv run uvicorn api_server:app --reload
 ```
 
@@ -60,8 +62,20 @@ uv run uvicorn api_server:app --reload
 For command-line interactions, such as working directly with the knowledge graph or agents, use:
 
 ```bash
+cd backend
 uv run python -m interview_guide.graph
 ```
+
+### Frontend UI (static prototype)
+
+A lightweight client lives in `frontend/`. Serve it locally (any static server works); for example:
+
+```bash
+cd frontend
+python3 -m http.server 4173
+```
+
+Then visit `http://localhost:4173` in your browser while the backend is running on `http://localhost:8000`. The UI calls `/api/agent/execute` by default; adjust `window.API_BASE_URL` in `frontend/app.js` if you host the API elsewhere.
 
 ## Example Usage
 
@@ -70,6 +84,7 @@ uv run python -m interview_guide.graph
 You can interact with the system using the CLI-like mode by running:
 
 ```bash
+cd backend
 uv run python -m interview_guide.graph
 ```
 
@@ -93,7 +108,7 @@ curl -X POST http://127.0.0.1:8000/api/agent/execute \
   -d '{"query":"Give me resources for decision trees","user_id":"demo"}'
 ```
 
-Power-tool endpoints remain available for admin or automation workflows:
+Power-tool endpoints remain available for admin or automation workflows. Their implementations reside under `backend/src/interview_guide/api/power_tools/`:
 
 - `POST /api/jd/fetch`
 - `POST /api/jd/profile`
@@ -110,8 +125,8 @@ Power-tool endpoints remain available for admin or automation workflows:
 Deploy the backend to your preferred host (e.g., cloud VM, container service) using the FastAPI server. Typical steps:
 
 1. Ensure environment variables are set for API keys and database path.
-2. Install dependencies with `uv sync` (or bake them into a container image).
-3. Start the API with `uvicorn api_server:app --host 0.0.0.0 --port 8000`.
+2. Install dependencies inside `backend/` with `uv sync` (or bake them into a container image).
+3. Start the API with `cd backend && uv run uvicorn api_server:app --host 0.0.0.0 --port 8000`.
 4. Place the service behind your load balancer or gateway.
 
 ## Contributing

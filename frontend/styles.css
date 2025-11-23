@@ -1,0 +1,334 @@
+:root {
+  color-scheme: dark only;
+  font-family: "Product Sans", "Google Sans", "Inter", "SF Pro Display", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --bg: radial-gradient(circle at top, #1c1f2b 0%, #0b0f19 45%, #05060c 100%);
+  --ink: #f8fafc;
+  --muted: #9aa4c2;
+  --surface: #151826;
+  --surface-elevated: #1f2435;
+  --accent: #7dd3fc;
+  --shadow: 0 35px 80px rgba(5, 6, 12, 0.55);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  background-attachment: fixed;
+  color: var(--ink);
+}
+
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem 4rem;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.hero__title {
+  font-size: clamp(2.8rem, 5vw, 3.8rem);
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.hero__subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.2rem;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 2rem;
+}
+
+.user-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding: 0.45rem 0.75rem;
+  background: rgba(15, 17, 27, 0.4);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.user-hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.chat-panel {
+  background: rgba(15, 17, 27, 0.65);
+  border-radius: 2rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.chat-stream {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.chat-turn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.bubble {
+  padding: 1rem 1.25rem;
+  border-radius: 1.25rem;
+  line-height: 1.6;
+  font-size: 0.98rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+  white-space: pre-wrap;
+}
+
+.bubble--user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  border-top-right-radius: 0.3rem;
+}
+
+.bubble--agent {
+  align-self: flex-start;
+  background: rgba(9, 11, 19, 0.85);
+  border-top-left-radius: 0.3rem;
+}
+
+.action-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.action-chip {
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  background: rgba(148, 163, 184, 0.2);
+  color: var(--ink);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.action-chip:hover {
+  background: rgba(148, 163, 184, 0.3);
+  transform: translateY(-1px);
+}
+
+.composer {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: sticky;
+  bottom: 1.25rem;
+  background: rgba(8, 10, 18, 0.85);
+  border-radius: 1.5rem;
+  padding: 1rem;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.composer__surface {
+  position: relative;
+  border-radius: 30px;
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0.6rem;
+  overflow: hidden;
+}
+
+.composer__surface.is-loading .composer__pulse {
+  opacity: 1;
+  animation: pulse 1.6s linear infinite;
+}
+
+.composer__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 1rem 1.25rem;
+  font-size: 1.05rem;
+  color: var(--ink);
+  outline: none;
+  resize: none;
+  min-height: 3rem;
+}
+
+.composer__input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.composer__action {
+  border: none;
+  border-radius: 24px;
+  padding: 0.7rem 2rem;
+  font-size: 1.05rem;
+  background: #0f1524;
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-weight: 600;
+}
+
+.composer__action:hover {
+  transform: translateY(-1px);
+}
+
+.composer__pulse {
+  position: absolute;
+  inset: 1px;
+  border-radius: 28px;
+  background: linear-gradient(120deg, transparent 10%, rgba(125, 211, 252, 0.2), transparent 90%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.user-input {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.95rem;
+  background: #0f1422;
+  color: var(--ink);
+}
+
+.status-message {
+  color: var(--muted);
+  margin-top: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.insights {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.insight-card {
+  background: rgba(15, 17, 27, 0.8);
+  border-radius: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow);
+}
+
+.insight-card h3 {
+  margin: 0 0 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.insight-content {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(248, 250, 252, 0.9);
+}
+
+.resource-pill {
+  background: rgba(125, 211, 252, 0.1);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+.resource-pill a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.inline-resource-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.inline-resource-list li {
+  margin-bottom: 0.3rem;
+}
+
+.inline-resource-list a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.error-banner {
+  color: #fecdd3;
+  background: rgba(190, 18, 60, 0.2);
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 1024px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .insights {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .insight-card {
+    flex: 1 1 300px;
+  }
+}
+
+@media (max-width: 640px) {
+  .chat-panel {
+    padding: 1rem;
+  }
+
+  .composer__surface {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .composer__action {
+    width: 100%;
+  }
+}

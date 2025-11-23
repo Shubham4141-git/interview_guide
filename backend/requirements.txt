@@ -1,0 +1,11 @@
+streamlit
+langgraph
+langchain
+langchain-google-genai
+tavily-python
+requests
+beautifulsoup4
+pydantic
+python-dotenv
+sentence-transformers
+scikit-learn

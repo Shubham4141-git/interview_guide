@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Interview Guide</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <h1 class="hero__title">Interview Guide</h1>
+        <p class="hero__subtitle">Conversational AI built for interview prep.</p>
+        <div class="user-switch">
+          <label class="user-label" for="user-id">User</label>
+          <input id="user-id" class="user-input" type="text" value="demo" data-user />
+          <span class="user-hint">Use unique IDs to keep sessions separate.</span>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <div class="chat-panel">
+          <div class="chat-stream" id="chat-stream"></div>
+
+          <form class="composer" data-form>
+            <div class="composer__surface" data-composer>
+              <textarea
+                id="query-input"
+                class="composer__input"
+                name="query"
+                placeholder="Ask Interview Guide anything…"
+                autocomplete="off"
+                rows="1"
+                data-input
+                required
+              ></textarea>
+              <button class="composer__action" type="submit">Send</button>
+              <span class="composer__pulse" aria-hidden="true"></span>
+            </div>
+          </form>
+
+          <p class="status-message" id="status-message">Ready when you are.</p>
+        </div>
+
+        <aside class="insights">
+          <div class="insight-card" id="profile-card">
+            <h3>Profile Snapshot</h3>
+            <div class="insight-content" data-profile>Run an evaluation to see insights.</div>
+          </div>
+          <div class="insight-card" id="resources-card">
+            <h3>Recommended Resources</h3>
+            <div class="insight-content" data-resources>Ask for resources to populate this panel.</div>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <template id="chat-turn-template">
+      <div class="chat-turn">
+        <div class="bubble bubble--user"></div>
+        <div class="bubble bubble--agent"></div>
+      </div>
+    </template>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

@@ -10,7 +10,17 @@
     <main class="page">
       <header class="hero">
         <div class="hero__content">
-          <h1 class="hero__title">Interview Guide</h1>
+          <div class="hero__title-row">
+            <img
+              class="hero__logo"
+              src="./assets/Interview_guide_logo.png?v=2"
+              alt="Interview Guide logo"
+              width="64"
+              height="64"
+              loading="lazy"
+            />
+            <h1 class="hero__title">Interview Guide</h1>
+          </div>
           <p class="hero__subtitle">Conversational AI built for interview prep.</p>
         </div>
       </header>
@@ -45,6 +55,9 @@
               <label class="user-label" for="user-id">User</label>
               <input id="user-id" class="user-input" type="text" value="demo" data-user />
             </div>
+            <select class="user-dropdown" data-user-dropdown>
+              <option value="">Select saved user</option>
+            </select>
             <span class="user-hint">Use unique IDs to keep sessions separate.</span>
           </div>
           <div class="insight-card" id="profile-card">

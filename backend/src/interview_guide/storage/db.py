@@ -162,6 +162,24 @@ def latest_session_id(user_id: str) -> Optional[int]:
         return int(row[0]) if row else None
 
 
+def list_user_ids(limit: int = 50) -> List[str]:
+    """Return distinct user IDs ordered by most recent activity."""
+    sql = """
+    SELECT user_id
+    FROM (
+        SELECT user_id, MAX(created_at) AS last_seen
+        FROM sessions
+        WHERE COALESCE(user_id, '') <> ''
+        GROUP BY user_id
+    )
+    ORDER BY datetime(last_seen) DESC
+    LIMIT ?
+    """
+    with _connect() as cx:
+        cur = cx.execute(sql, (limit,))
+        return [row["user_id"] for row in cur.fetchall()]
+
+
 # Ensure tables/indexes exist when module is imported
 init()
 _migrate_add_skill_column()

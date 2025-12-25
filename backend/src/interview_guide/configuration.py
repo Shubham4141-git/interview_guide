@@ -1,12 +1,14 @@
 
 
 import os
+from pathlib import Path
 from typing import Optional
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
 # Load environment variables from .env file, if present
-load_dotenv()
+_ROOT = Path(__file__).resolve().parents[3]
+load_dotenv(_ROOT / ".env")
 
 def _first(*keys: str) -> Optional[str]:
     """

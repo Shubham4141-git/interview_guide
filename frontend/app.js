@@ -9,6 +9,7 @@ const turnTemplate = document.getElementById("chat-turn-template");
 const composerSurface = document.querySelector("[data-composer]");
 const profileContent = document.querySelector("[data-profile]");
 const resourcesContent = document.querySelector("[data-resources]");
+const userDropdown = document.querySelector("[data-user-dropdown]");
 
 let isLoading = false;
 const turns = [];
@@ -66,6 +67,48 @@ function formatResources(resources = []) {
     block.appendChild(anchor);
     resourcesContent.appendChild(block);
   });
+}
+
+async function loadUserList(selectedId) {
+  if (!userDropdown) {
+    return;
+  }
+  try {
+    const response = await fetch(`${API_BASE}/users`);
+    if (!response.ok) {
+      throw new Error("Failed to load users");
+    }
+    const payload = await response.json();
+    userDropdown.innerHTML = '<option value="">Select saved user</option>';
+    (payload.users || []).forEach((id) => {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = id;
+      if (id === selectedId) {
+        option.selected = true;
+      }
+      userDropdown.appendChild(option);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function fetchUserOverview(userId) {
+  if (!userId) {
+    return;
+  }
+  try {
+    const response = await fetch(`${API_BASE}/users/${encodeURIComponent(userId)}`);
+    if (!response.ok) {
+      throw new Error("Failed to load user overview");
+    }
+    const payload = await response.json();
+    formatProfile(payload.profile || {});
+    formatResources(payload.resources || []);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 function createBubble(text, variant = "agent") {
@@ -220,6 +263,8 @@ async function handleSubmit(event) {
     setStatus("Done.");
     input.value = "";
     input.style.height = "auto";
+    loadUserList(userId);
+    fetchUserOverview(userId);
   } catch (error) {
     const errorBubble = document.createElement("div");
     errorBubble.className = "error-banner";
@@ -237,3 +282,27 @@ input.addEventListener("input", () => {
   input.style.height = "auto";
   input.style.height = `${input.scrollHeight}px`;
 });
+
+if (userDropdown) {
+  userDropdown.addEventListener("change", (event) => {
+    const selected = event.target.value;
+    if (selected) {
+      userInput.value = selected;
+      fetchUserOverview(selected);
+    }
+  });
+}
+
+if (userInput) {
+  userInput.addEventListener("input", () => {
+    if (userDropdown) {
+      userDropdown.value = "";
+    }
+  });
+}
+
+const initialUserId = (userInput.value || "").trim();
+loadUserList(initialUserId);
+if (initialUserId) {
+  fetchUserOverview(initialUserId);
+}

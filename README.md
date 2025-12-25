@@ -39,8 +39,10 @@ Create a `.env` file in the project root (or within `backend/`) with the followi
 ```
 GOOGLE_API_KEY=your_google_api_key_here
 TAVILY_API_KEY=your_tavily_api_key_here
-INTERVIEW_GUIDE_DB=interview_guide.db            # optional override of the SQLite path
+INTERVIEW_GUIDE_DB=/absolute/path/to/interview_guide.db
 ```
+
+Set `INTERVIEW_GUIDE_DB` to any persistent location (e.g., `/var/interview_guide/interview_guide.db`). SQLite stores all user sessions/scores in that file, so keeping it outside the repo ensures data survives backend restarts and deployments. On servers or containers, mount that path as persistent storage.
 
 These API keys are required for accessing external services used in job description processing and other features.
 
@@ -119,12 +121,14 @@ Power-tool endpoints remain available for admin or automation workflows. Their i
 - `POST /api/sessions`
 - `GET /api/sessions`
 - `GET /api/sessions/{id}/questions`
+- `GET /api/users`
+- `GET /api/users/{user_id}`
 
 ## Deployment
 
 Deploy the backend to your preferred host (e.g., cloud VM, container service) using the FastAPI server. Typical steps:
 
-1. Ensure environment variables are set for API keys and database path.
+1. Ensure environment variables are set for API keys **and** `INTERVIEW_GUIDE_DB` (point it at a persistent location/volume).
 2. Install dependencies inside `backend/` with `uv sync` (or bake them into a container image).
 3. Start the API with `cd backend && uv run uvicorn api_server:app --host 0.0.0.0 --port 8000`.
 4. Place the service behind your load balancer or gateway.

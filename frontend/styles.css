@@ -72,7 +72,7 @@ body {
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.5rem;
 }
 
 .user-switch {
@@ -100,6 +100,15 @@ body {
 .user-hint {
   color: rgba(200, 210, 228, 0.7);
   font-size: 0.78rem;
+}
+
+.user-dropdown {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
 }
 
 .chat-panel {
@@ -361,6 +370,10 @@ body {
   .composer__action {
     width: 100%;
   }
+
+  .hero__title-row {
+    gap: 0.6rem;
+  }
 }
 .hero::after {
   display: none;
@@ -383,7 +396,8 @@ body {
 }
 
 .hero__title {
-  font-size: clamp(2.6rem, 4vw, 4.2rem);
+  font-size: inherit;
+  line-height: 1.05;
   margin: 0;
   letter-spacing: -0.02em;
   font-weight: 760;
@@ -395,6 +409,22 @@ body {
   color: rgba(206, 216, 230, 0.85);
   font-size: 1.1rem;
   letter-spacing: 0.02em;
+}
+
+.hero__title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: nowrap;
+  font-size: clamp(2.6rem, 4vw, 4.2rem);
+  line-height: 1;
+}
+
+.hero__logo {
+  width: auto;
+  height: 1.1em;
+  flex-shrink: 0;
+  display: block;
 }
 
 .user-switch {

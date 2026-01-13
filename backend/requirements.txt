@@ -5,7 +5,10 @@ langchain-google-genai
 tavily-python
 requests
 beautifulsoup4
+fastapi
 pydantic
 python-dotenv
 sentence-transformers
 scikit-learn
+uvicorn
+gunicorn

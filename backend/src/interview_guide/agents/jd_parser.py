@@ -40,6 +40,11 @@ class JDOpenProfile(BaseModel):
     weights_by_theme: Any = Field(default_factory=dict)  # sum ~ 1.0
     tasks: Any = Field(default_factory=list)     # 10–20 concise task statements
     skills: Any = Field(default_factory=list)    # overall deduped skills/tools/methods (incl. soft skills if explicit)
+    technical_skills: Any = Field(default_factory=list)  # strictly technical skills/tools only
+    non_technical_skills: Any = Field(default_factory=list)  # soft skills, management, HR, ops
+    management_responsibilities: Any = Field(default_factory=list)  # people/process/stakeholder duties
+    job_type: Optional[str] = None  # "tech" | "non-tech"
+    job_type_confidence: Optional[float] = None
     contexts: Any = Field(default_factory=list)  # constraints/shifts/compliance/equipment/domain notes
 
 # For backward compatibility
@@ -56,6 +61,11 @@ _SYSTEM_PROFILE = (
     "weights_by_theme: numeric weights over those themes summing to ~1.0 (0–1 floats).\n"
     "tasks: 10–20 short, concrete task statements extracted from the JD, plain language.\n"
     "skills: deduplicated list of concrete skills/tools/methods (include soft skills only if explicit).\n"
+    "technical_skills: list of strictly technical skills/tools/technologies from the JD.\n"
+    "non_technical_skills: list of soft skills, management, HR, or process skills from the JD.\n"
+    "management_responsibilities: list of people/process/stakeholder responsibilities (short phrases).\n"
+    "job_type: either \"tech\" or \"non-tech\" based on the primary role focus.\n"
+    "job_type_confidence: float 0-1 for the job_type decision.\n"
     "contexts: constraints/shift patterns/compliance/equipment/domain notes (short phrases), if present.\n"
     "Return ONLY valid JSON matching these keys. No extra text."
 )
@@ -68,6 +78,10 @@ _TEMPLATE_PROFILE = (
     "\"weights_by_theme\":{{\"Patrol & Monitoring\":0.45,\"Access Control\":0.35,\"Incident Response\":0.20}},"
     "\"tasks\":[\"Perform scheduled patrols\",\"Monitor CCTV\",\"Check visitor badges\",\"Respond to alarms\"],"
     "\"skills\":[\"Report writing\",\"De-escalation\",\"CCTV operation\",\"Radio comms\"],"
+    "\"technical_skills\":[\"CCTV operation\"],"
+    "\"non_technical_skills\":[\"Report writing\",\"De-escalation\"],"
+    "\"management_responsibilities\":[\"Supervise overnight shift\"],"
+    "\"job_type\":\"non-tech\",\"job_type_confidence\":0.8,"
     "\"contexts\":[\"Night shifts\",\"HIPAA environment\",\"Use of metal detector\"]}}"
 )
 
@@ -209,7 +223,32 @@ def extract_profile_from_slots(slots: Dict[str, Any]) -> JDOpenProfile:
 
         prof.tasks = _as_list(getattr(prof, "tasks", []))  # type: ignore[attr-defined]
         prof.skills = _as_list(getattr(prof, "skills", []))  # type: ignore[attr-defined]
+        prof.technical_skills = _as_list(getattr(prof, "technical_skills", []))  # type: ignore[attr-defined]
+        prof.non_technical_skills = _as_list(getattr(prof, "non_technical_skills", []))  # type: ignore[attr-defined]
+        prof.management_responsibilities = _as_list(  # type: ignore[attr-defined]
+            getattr(prof, "management_responsibilities", [])
+        )
         prof.contexts = _as_list(getattr(prof, "contexts", []))  # type: ignore[attr-defined]
+
+        def _normalize_job_type(value: Any) -> Optional[str]:
+            if not value:
+                return None
+            low = str(value).strip().lower()
+            if low in {"tech", "technical", "engineering"}:
+                return "tech"
+            if low in {"non-tech", "nontech", "non technical", "nontechnical"}:
+                return "non-tech"
+            return None
+
+        prof.job_type = _normalize_job_type(getattr(prof, "job_type", None))  # type: ignore[attr-defined]
+        try:
+            conf = getattr(prof, "job_type_confidence", None)
+            conf_val = float(conf) if conf is not None else None
+        except Exception:
+            conf_val = None
+        if conf_val is not None:
+            conf_val = max(0.0, min(1.0, conf_val))
+        prof.job_type_confidence = conf_val  # type: ignore[attr-defined]
 
     except Exception as e:
         print("[JD_PARSER] Using fallback profile —", repr(e))
@@ -222,6 +261,11 @@ def extract_profile_from_slots(slots: Dict[str, Any]) -> JDOpenProfile:
             weights_by_theme=weights,
             tasks=tasks,
             skills=_regex_skills(jd_text),
+            technical_skills=[],
+            non_technical_skills=[],
+            management_responsibilities=[],
+            job_type=None,
+            job_type_confidence=None,
             contexts=[],
         )
 
@@ -244,6 +288,14 @@ def extract_profile_from_slots(slots: Dict[str, Any]) -> JDOpenProfile:
     # themes aligned with weights keys if available
     themes = list(weights.keys()) or (prof.themes or [])
 
+    def _clean_list(items: Any, limit: int) -> List[str]:
+        cleaned = _dedupe_keep_order([str(i).strip() for i in (items or []) if str(i).strip()])
+        return cleaned[:limit]
+
+    technical_skills_out = _clean_list(getattr(prof, "technical_skills", []), 80)
+    non_technical_skills_out = _clean_list(getattr(prof, "non_technical_skills", []), 80)
+    management_out = _clean_list(getattr(prof, "management_responsibilities", []), 40)
+
     return JDOpenProfile(
         role=(prof.role or None),
         subroles=[sr.strip() for sr in (prof.subroles or []) if sr and sr.strip()][:4],
@@ -253,6 +305,11 @@ def extract_profile_from_slots(slots: Dict[str, Any]) -> JDOpenProfile:
             list(dict.fromkeys([t.strip() for t in (prof.tasks or []) if t and t.strip()]))
         )[:20],
         skills=skills_out[:80],
+        technical_skills=technical_skills_out,
+        non_technical_skills=non_technical_skills_out,
+        management_responsibilities=management_out,
+        job_type=getattr(prof, "job_type", None),
+        job_type_confidence=getattr(prof, "job_type_confidence", None),
         contexts=_dedupe_keep_order([c.strip() for c in (prof.contexts or []) if c and c.strip()])[:12],
     )
 

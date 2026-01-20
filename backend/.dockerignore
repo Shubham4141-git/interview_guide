@@ -1,0 +1,14 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+*.db
+*.db-*
+*.sqlite
+*.log
+*.tmp
+uv.lock
+pyproject.toml
+.python-version

@@ -34,7 +34,7 @@ uv sync
 
 ## Configuration
 
-Create a `.env` file in the project root (or within `backend/`) with the following environment variables:
+Create a `.env` file (do not commit it) and set the required API keys plus a database path for persistent storage. Keep secrets out of source control.
 
 ```
 GOOGLE_API_KEY=your_google_api_key_here
@@ -42,15 +42,13 @@ TAVILY_API_KEY=your_tavily_api_key_here
 INTERVIEW_GUIDE_DB=/absolute/path/to/interview_guide.db
 ```
 
-Set `INTERVIEW_GUIDE_DB` to any persistent location (e.g., `/var/interview_guide/interview_guide.db`). SQLite stores all user sessions/scores in that file, so keeping it outside the repo ensures data survives backend restarts and deployments. On servers or containers, mount that path as persistent storage.
-
-These API keys are required for accessing external services used in job description processing and other features.
+Set `INTERVIEW_GUIDE_DB` to any persistent location. SQLite stores all user sessions/scores in that file, so keeping it outside the repo ensures data survives backend restarts and deployments.
 
 ## Running the Application
 
 ### Backend API Mode
 
-To launch the FastAPI backend (which powers the upcoming UI), run:
+To launch the FastAPI backend (which powers the UI), run:
 
 ```bash
 cd backend
@@ -77,7 +75,7 @@ cd frontend
 python3 -m http.server 4173
 ```
 
-Then visit `http://localhost:4173` in your browser while the backend is running on `http://localhost:8000`. The UI calls `/api/agent/execute` by default; adjust `window.API_BASE_URL` in `frontend/app.js` if you host the API elsewhere.
+Then visit `http://localhost:4173` in your browser while the backend is running on `http://localhost:8000`. The UI calls `/api/agent/execute` by default; adjust `window.API_BASE_URL` in `frontend/index.html` if you host the API elsewhere.
 
 ## Example Usage
 
@@ -97,8 +95,6 @@ Once running, you can enter queries such as:
 - `Evaluate these answers: Candidate's response about polymorphism in OOP.`
 - `Show my profile`
 - `Update my prefs: free only, YouTube`
-
-These commands allow you to generate interview questions, ingest job descriptions, evaluate candidate answers, view your profile, and update your preferences respectively.
 
 ### Backend API Mode
 
@@ -126,12 +122,15 @@ Power-tool endpoints remain available for admin or automation workflows. Their i
 
 ## Deployment
 
-Deploy the backend to your preferred host (e.g., cloud VM, container service) using the FastAPI server. Typical steps:
+Deploy the backend to your preferred host using a FastAPI-compatible server, set the required environment variables, and ensure the database path points to persistent storage.
 
-1. Ensure environment variables are set for API keys **and** `INTERVIEW_GUIDE_DB` (point it at a persistent location/volume).
-2. Install dependencies inside `backend/` with `uv sync` (or bake them into a container image).
-3. Start the API with `cd backend && uv run uvicorn api_server:app --host 0.0.0.0 --port 8000`.
-4. Place the service behind your load balancer or gateway.
+### Azure Deployment (current setup)
+
+Backend runs on Azure App Service (container). Frontend runs on Azure Static Web Apps. URLs and deployment commands are intentionally omitted from this README.
+
+### Local Development
+
+Run the backend locally on port 8000 and serve the `frontend/` folder with any local static server. The frontend auto-selects the API base based on whether it is running locally or hosted.
 
 ## Contributing
 

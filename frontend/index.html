@@ -79,6 +79,12 @@
       </div>
     </template>
 
+    <script>
+      const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+      window.API_BASE_URL = isLocal
+        ? "http://localhost:8000"
+        : "https://interview-guide-1-a7hgazcrcrehfnfb.canadacentral-01.azurewebsites.net";
+    </script>
     <script type="module" src="./app.js"></script>
   </body>
 </html>

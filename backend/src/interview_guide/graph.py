@@ -120,7 +120,149 @@ _SOFT_SKILL_STOPWORDS = {
     "people management",
     "mentoring",
     "coaching",
+    "project management",
+    "agile",
+    "scrum",
+    "kanban",
+    "roadmap",
+    "prioritization",
+    "prioritisation",
 }
+
+_TECH_HINTS = {
+    "software",
+    "developer",
+    "engineer",
+    "backend",
+    "frontend",
+    "full stack",
+    "full-stack",
+    "data engineer",
+    "data scientist",
+    "machine learning",
+    "ml",
+    "ai",
+    "devops",
+    "sre",
+    "cloud",
+    "kubernetes",
+    "docker",
+    "aws",
+    "azure",
+    "gcp",
+    "python",
+    "java",
+    "javascript",
+    "typescript",
+    "react",
+    "node",
+    "sql",
+    "database",
+    "postgres",
+    "mysql",
+    "mongodb",
+    "redis",
+    "kafka",
+    "spark",
+    "hadoop",
+    "airflow",
+    "etl",
+    "api",
+    "microservice",
+    "microservices",
+    "distributed systems",
+    "system design",
+    "linux",
+    "git",
+    "ci/cd",
+    "terraform",
+    "fastapi",
+    "django",
+    "flask",
+}
+
+_NON_TECH_HINTS = {
+    "sales",
+    "marketing",
+    "hr",
+    "human resources",
+    "recruiter",
+    "recruitment",
+    "customer support",
+    "customer success",
+    "account manager",
+    "business development",
+    "operations",
+    "office manager",
+    "administrative",
+    "finance",
+    "accounting",
+    "legal",
+    "content",
+    "writer",
+    "copywriter",
+    "designer",
+    "social media",
+    "brand",
+    "public relations",
+}
+
+_SOFT_QUESTION_HINTS = (
+    "tell me about a time",
+    "describe a time",
+    "how do you handle conflict",
+    "conflict resolution",
+    "team player",
+    "leadership style",
+    "people management",
+    "project management",
+    "stakeholder management",
+    "prioritize tasks",
+    "work with stakeholders",
+    "work with clients",
+    "communication skills",
+    "cultural fit",
+    "why do you want",
+    "strengths",
+    "weaknesses",
+    "salary expectations",
+    "career goals",
+    "motivation",
+    "behavioral",
+)
+
+
+def _count_keyword_hits(text: str, keywords: set[str]) -> int:
+    return sum(1 for kw in keywords if kw in text)
+
+
+def _classify_jd_type(jd_text: str, skills: list[str]) -> str:
+    haystack = " ".join([jd_text] + (skills or [])).lower()
+    if not haystack.strip():
+        return "non-tech"
+    tech_hits = _count_keyword_hits(haystack, _TECH_HINTS)
+    non_tech_hits = _count_keyword_hits(haystack, _NON_TECH_HINTS)
+    if tech_hits >= max(2, non_tech_hits + 1):
+        return "tech"
+    if tech_hits >= 1 and non_tech_hits == 0:
+        return "tech"
+    return "non-tech"
+
+
+def _looks_non_technical_question(text: str) -> bool:
+    low = (text or "").lower()
+    return any(hint in low for hint in _SOFT_QUESTION_HINTS)
+
+
+def _filter_non_technical_questions(questions: list[Dict[str, Any]]) -> list[Dict[str, Any]]:
+    if not questions:
+        return []
+    filtered: list[Dict[str, Any]] = []
+    for q in questions:
+        text = q.get("text") if isinstance(q, dict) else str(q)
+        if not _looks_non_technical_question(text):
+            filtered.append(q)
+    return filtered
 
 
 def _filter_technical_skills(skills: list[str]) -> list[str]:
@@ -136,7 +278,7 @@ def _filter_technical_skills(skills: list[str]) -> list[str]:
     return out
 
 
-def _build_skill_topic(skills: List[str], n: int) -> str:
+def _build_skill_topic(skills: List[str], n: int, *, strict_technical: bool = False) -> str:
     """Create a reusable few-shot topic string focused strictly on listed skills."""
     if not skills:
         raise ValueError("_build_skill_topic requires at least one skill")
@@ -193,6 +335,13 @@ def _build_skill_topic(skills: List[str], n: int) -> str:
     "• Never copy provided example questions\n"
     "• Each question must reference specific target skills"
     )
+
+    if strict_technical:
+        guidance += (
+            "\n\nTECH ONLY:\n"
+            "• Ask ONLY technical questions about tools, systems, algorithms, or implementation details\n"
+            "• Avoid soft skills, HR/behavioral, leadership, management, or culture questions"
+        )
     
     request = (
         f"Target skill list:\n{bullet_lines}\n"
@@ -345,7 +494,23 @@ def qgen_from_jd(state: GraphState) -> GraphState:
 
     # Save some of the profile to state for visibility
     skills_all = list(getattr(profile, "skills", []) or [])
-    skills_all = _filter_technical_skills(skills_all)
+    jd_text = (slots.get("jd_text") or "").strip()
+    job_type = getattr(profile, "job_type", None)
+    job_type_conf = getattr(profile, "job_type_confidence", None)
+    try:
+        conf_val = float(job_type_conf) if job_type_conf is not None else None
+    except Exception:
+        conf_val = None
+    if conf_val is not None and conf_val < 0.7:
+        job_type = None
+    if job_type not in {"tech", "non-tech"}:
+        job_type = _classify_jd_type(jd_text, skills_all)
+    state["job_type"] = job_type
+    if job_type == "tech":
+        technical_skills = list(getattr(profile, "technical_skills", []) or [])
+        if not technical_skills:
+            technical_skills = skills_all
+        skills_all = _filter_technical_skills(technical_skills)
     state["skills"] = list(skills_all)
     state["themes"] = []
 
@@ -373,7 +538,7 @@ def qgen_from_jd(state: GraphState) -> GraphState:
             if len(questions) >= desired_total:
                 break
             need = group_alloc[g_idx]
-            topic = _build_skill_topic(group, need)
+            topic = _build_skill_topic(group, need, strict_technical=(job_type == "tech"))
             skill_slots = dict(slots)
             skill_slots["topic"] = topic
             skill_slots["n"] = str(need)
@@ -389,14 +554,22 @@ def qgen_from_jd(state: GraphState) -> GraphState:
                     q["meta"].setdefault("skill_group", list(group))
             questions.extend(qs[:need])
 
+    if job_type == "tech":
+        questions = _filter_non_technical_questions(questions)
+
     # If no skills detected or generation failed, fall back to a generic topic using JD text
     if not questions:
-        jd_text = (slots.get("jd_text") or "").strip()
         fallback_topic = (
             "Generate practical interview questions for this job description.\n"
             "Focus on key skills and responsibilities mentioned.\n"
             f"JD snippet: {jd_text[:500]}"
         )
+        if job_type == "tech":
+            fallback_topic = (
+                "Generate strictly technical interview questions for this job description.\n"
+                "Avoid HR, behavioral, management, or soft-skill questions.\n"
+                f"JD snippet: {jd_text[:500]}"
+            )
         fallback_slots = dict(slots)
         fallback_slots["topic"] = fallback_topic
         fallback_slots["n"] = str(base_target)
@@ -404,6 +577,8 @@ def qgen_from_jd(state: GraphState) -> GraphState:
             fallback = generate_from_topic(fallback_slots, n=base_target)
         except Exception:
             fallback = []
+        if job_type == "tech":
+            fallback = _filter_non_technical_questions(fallback)
         questions.extend(fallback[:base_target])
 
     final_cap = desired_total if skill_groups else base_target

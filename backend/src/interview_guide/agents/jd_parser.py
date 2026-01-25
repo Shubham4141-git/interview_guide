@@ -96,6 +96,8 @@ _SYSTEM_SKILLS = (
     "skills: ALL skills/tools/platforms/methods mentioned (deduped).\n"
     "technical_skills: strictly technical skills/tools/platforms.\n"
     "non_technical_skills: soft skills, leadership, coaching, communication, management.\n"
+    "Do NOT invent skills. ONLY include terms that are explicitly present in the JD text.\n"
+    "If a term is not in the JD, leave it out.\n"
     "Include acronyms and their full forms when possible (e.g., \"RAG (Retrieval-Augmented Generation)\").\n"
     "Include job-specific keywords (e.g., \"feature engineering\", \"experiment design\").\n"
     "Return ONLY valid JSON matching these keys. No extra text."
@@ -289,6 +291,53 @@ def _normalize_skills(items: List[str]) -> List[str]:
         out.append(canon)
     return out
 
+def _build_alias_map() -> Dict[str, Set[str]]:
+    alias_map: Dict[str, Set[str]] = {}
+    for alias, canon in _SKILL_CANON.items():
+        key = canon.lower()
+        alias_map.setdefault(key, set()).add(alias)
+    return alias_map
+
+_ALIAS_MAP = _build_alias_map()
+
+def _term_in_text(term: str, text: str) -> bool:
+    if not term:
+        return False
+    term = term.strip().lower()
+    if not term:
+        return False
+    # Use word-boundary matching for short alnum terms to avoid false positives (e.g., "ai" in "email").
+    if len(term) <= 3 and term.replace(" ", "").isalnum():
+        return bool(re.search(rf"\\b{re.escape(term)}\\b", text))
+    # For longer terms, substring match is usually sufficient.
+    return term in text
+
+def _evidence_filter(skills: List[str], jd_text: str) -> List[str]:
+    """Keep only skills that appear (directly or via aliases) in the JD text."""
+    jd_low = " ".join((jd_text or "").lower().split())
+    if not jd_low:
+        return skills
+
+    out: List[str] = []
+    for s in skills or []:
+        raw = str(s).strip()
+        if not raw:
+            continue
+        # Variants: raw, raw without parenthetical, canonical aliases
+        variants = set()
+        variants.add(raw.lower())
+        stripped = re.sub(r"\s*\([^)]*\)", "", raw).strip()
+        if stripped:
+            variants.add(stripped.lower())
+        canon = _SKILL_CANON.get(raw.lower(), raw)
+        aliases = _ALIAS_MAP.get(canon.lower(), set())
+        variants.update(aliases)
+
+        if any(_term_in_text(v, jd_low) for v in variants if v):
+            out.append(raw)
+
+    return _normalize_skills(out)
+
 def extract_skills_payload_from_slots(slots: Dict[str, Any]) -> Dict[str, List[str]]:
     jd_text = (slots.get("jd_text") or "").strip()
     if not jd_text:
@@ -305,8 +354,16 @@ def extract_skills_payload_from_slots(slots: Dict[str, Any]) -> Dict[str, List[s
         skills = _normalize_skills(res.skills or [])
         tech = _normalize_skills(res.technical_skills or [])
         nontech = _normalize_skills(res.non_technical_skills or [])
-        # Merge any missing technicals into overall skills
         merged = _normalize_skills(skills + tech + nontech)
+
+        # Evidence check: only keep skills that appear in the JD (or via aliases)
+        merged = _evidence_filter(merged, jd_text)
+        tech = _evidence_filter(tech, jd_text)
+        nontech = _evidence_filter(nontech, jd_text)
+
+        # If everything was filtered out, fall back to regex skills (still JD-grounded)
+        if not merged:
+            merged = _normalize_skills(_regex_skills(jd_text))
         return {"skills": merged, "technical_skills": tech, "non_technical_skills": nontech}
     except Exception as e:
         print("[JD_SKILLS] Using fallback skills —", repr(e), flush=True)

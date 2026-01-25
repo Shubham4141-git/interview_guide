@@ -1,7 +1,7 @@
 from typing import Any, Dict, List
 import re
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from .intents import Intent, IntentType
 from .configuration import settings
 
@@ -63,23 +63,28 @@ _PROMPT = ChatPromptTemplate.from_messages([
 
 
 def _make_llm():
-    if settings.google_api_key is None:
-        raise RuntimeError("Missing GOOGLE_API_KEY / GEMINI_API_KEY")
-    return ChatGoogleGenerativeAI(
-        model=settings.llm_model,
-        api_key=settings.google_api_key,
+    if settings.openai_api_key is None:
+        raise RuntimeError("Missing OPENAI_API_KEY")
+    return ChatOpenAI(
+        model=settings.llm_model_default,
         temperature=0.0,
     )
 
 # Build chain with structured output
 _LLM = _make_llm()
-_CHAIN = (_PROMPT | _LLM.with_structured_output(Intent))
+_CHAIN = (_PROMPT | _LLM.with_structured_output(Intent, method="function_calling"))
 
 
 def classify(query: str, history: List[Dict[str, Any]] | None = None) -> Intent:
     """Classify a free-form user query into an Intent object."""
     payload = {"query": query, "history": history or []}
+    print(f"[router] classify start query_len={len(query or '')}", flush=True)
     intent: Intent = _CHAIN.invoke(payload)
+    print(
+        f"[router] classify done intent={intent.type.value if intent.type else None} "
+        f"confidence={intent.confidence}",
+        flush=True,
+    )
 
     if intent.confidence is None:
         intent.confidence = 0.5

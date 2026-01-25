@@ -1,7 +1,7 @@
 streamlit
 langgraph
 langchain
-langchain-google-genai
+langchain-openai
 tavily-python
 requests
 beautifulsoup4

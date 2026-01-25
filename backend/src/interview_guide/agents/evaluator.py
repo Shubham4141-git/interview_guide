@@ -6,7 +6,7 @@ Answer Evaluator
 from typing import Dict, Any, List
 from pydantic import BaseModel, Field, conint, confloat
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from interview_guide.configuration import settings
 
 # -------- structured output --------
@@ -44,11 +44,10 @@ _TEMPLATE = (
 )
 
 def _llm():
-    if not settings.google_api_key:
-        raise RuntimeError("Missing GOOGLE_API_KEY (or GEMINI_API_KEY).")
-    return ChatGoogleGenerativeAI(
-        model=settings.llm_model,
-        api_key=settings.google_api_key,
+    if not settings.openai_api_key:
+        raise RuntimeError("Missing OPENAI_API_KEY.")
+    return ChatOpenAI(
+        model=settings.llm_model_eval,
         temperature=0.1,
     )
 
@@ -70,7 +69,7 @@ def evaluate_from_slots(slots: Dict[str, Any]) -> List[Dict[str, Any]]:
     topic = (slots.get("topic") or "").strip()
 
     prompt = ChatPromptTemplate.from_template(_TEMPLATE)
-    chain = prompt | _llm().with_structured_output(ScoreList)
+    chain = prompt | _llm().with_structured_output(ScoreList, method="function_calling")
 
     payload = {
         "system": _SYSTEM,

@@ -5,7 +5,7 @@ from .router import classify
 from .intents import Intent, IntentType
 from .agents.recommender import recommend_from_slots
 from .agents.qgen import generate_from_topic
-from .agents.jd_parser import extract_profile_from_slots
+from .agents.jd_parser import extract_skills_payload_from_slots
 from .agents.evaluator import evaluate_from_slots
 from .agents.profile import summarize_profile
 from .agents.jd_fetcher import fetch_jd_from_url
@@ -129,138 +129,20 @@ _SOFT_SKILL_STOPWORDS = {
     "prioritisation",
 }
 
-_TECH_HINTS = {
-    "software",
-    "developer",
-    "engineer",
-    "backend",
-    "frontend",
-    "full stack",
-    "full-stack",
-    "data engineer",
-    "data scientist",
-    "machine learning",
-    "ml",
-    "ai",
-    "devops",
-    "sre",
-    "cloud",
-    "kubernetes",
-    "docker",
-    "aws",
-    "azure",
-    "gcp",
-    "python",
-    "java",
-    "javascript",
-    "typescript",
-    "react",
-    "node",
-    "sql",
-    "database",
-    "postgres",
-    "mysql",
-    "mongodb",
-    "redis",
-    "kafka",
-    "spark",
-    "hadoop",
-    "airflow",
-    "etl",
-    "api",
-    "microservice",
-    "microservices",
-    "distributed systems",
-    "system design",
-    "linux",
-    "git",
-    "ci/cd",
-    "terraform",
-    "fastapi",
-    "django",
-    "flask",
-}
-
-_NON_TECH_HINTS = {
-    "sales",
-    "marketing",
-    "hr",
-    "human resources",
-    "recruiter",
-    "recruitment",
-    "customer support",
-    "customer success",
-    "account manager",
-    "business development",
-    "operations",
-    "office manager",
-    "administrative",
-    "finance",
-    "accounting",
-    "legal",
-    "content",
-    "writer",
-    "copywriter",
-    "designer",
-    "social media",
-    "brand",
-    "public relations",
-}
-
-_SOFT_QUESTION_HINTS = (
-    "tell me about a time",
-    "describe a time",
-    "how do you handle conflict",
-    "conflict resolution",
-    "team player",
-    "leadership style",
-    "people management",
-    "project management",
-    "stakeholder management",
-    "prioritize tasks",
-    "work with stakeholders",
-    "work with clients",
-    "communication skills",
-    "cultural fit",
-    "why do you want",
-    "strengths",
-    "weaknesses",
-    "salary expectations",
-    "career goals",
-    "motivation",
-    "behavioral",
-)
-
-
-def _count_keyword_hits(text: str, keywords: set[str]) -> int:
-    return sum(1 for kw in keywords if kw in text)
-
-
-def _classify_jd_type(jd_text: str, skills: list[str]) -> str:
-    haystack = " ".join([jd_text] + (skills or [])).lower()
-    if not haystack.strip():
-        return "non-tech"
-    tech_hits = _count_keyword_hits(haystack, _TECH_HINTS)
-    non_tech_hits = _count_keyword_hits(haystack, _NON_TECH_HINTS)
-    if tech_hits >= max(2, non_tech_hits + 1):
-        return "tech"
-    if tech_hits >= 1 and non_tech_hits == 0:
-        return "tech"
-    return "non-tech"
-
-
-def _looks_non_technical_question(text: str) -> bool:
-    low = (text or "").lower()
-    return any(hint in low for hint in _SOFT_QUESTION_HINTS)
-
-
-def _filter_non_technical_questions(questions: list[Dict[str, Any]]) -> list[Dict[str, Any]]:
-    if not questions:
-        return []
+def _filter_questions_by_skill_terms(
+    questions: list[Dict[str, Any]],
+    skills: list[str],
+) -> list[Dict[str, Any]]:
+    if not questions or not skills:
+        return questions
+    terms = [s.strip().lower() for s in skills if s and s.strip()]
+    if not terms:
+        return questions
     filtered: list[Dict[str, Any]] = []
     for q in questions:
-        text = q.get("text") if isinstance(q, dict) else str(q)
-        if not _looks_non_technical_question(text):
+        text = (q.get("text") if isinstance(q, dict) else str(q)) or ""
+        low = text.lower()
+        if any(term in low for term in terms):
             filtered.append(q)
     return filtered
 
@@ -333,7 +215,8 @@ def _build_skill_topic(skills: List[str], n: int, *, strict_technical: bool = Fa
     "• Avoid: 'Explain the process...', 'Walk through...', 'Describe the architecture...', 'Describe a scenario...'\n"
     "• Keep questions short and focused\n"
     "• Never copy provided example questions\n"
-    "• Each question must reference specific target skills"
+    "• Each question must reference specific target skills\n"
+    "• Ensure every listed skill is covered at least once; if there are more skills than questions, combine related skills in a single question"
     )
 
     if strict_technical:
@@ -485,91 +368,89 @@ def ingest_jd(state: GraphState) -> GraphState:
 def qgen_from_jd(state: GraphState) -> GraphState:
     slots = state.get("slots", {}) or {}
     try:
-        profile = extract_profile_from_slots(slots)  # JDOpenProfile (role-agnostic)
+        print("[QGEN_FROM_JD] extracting skills", flush=True)
+        skill_payload = extract_skills_payload_from_slots(slots)
+        print("[QGEN_FROM_JD] skills extracted", flush=True)
     except Exception as e:
         state["skills"] = []
         state["questions"] = []
-        state["result"] = f"[QGEN_FROM_JD] profile extraction failed: {e}"
+        state["result"] = f"[QGEN_FROM_JD] skill extraction failed: {e}"
         return state
 
-    # Save some of the profile to state for visibility
-    skills_all = list(getattr(profile, "skills", []) or [])
+    # Save some of the skills to state for visibility
+    skills_all = list(skill_payload.get("skills") or [])
     jd_text = (slots.get("jd_text") or "").strip()
-    job_type = getattr(profile, "job_type", None)
-    job_type_conf = getattr(profile, "job_type_confidence", None)
-    try:
-        conf_val = float(job_type_conf) if job_type_conf is not None else None
-    except Exception:
-        conf_val = None
-    if conf_val is not None and conf_val < 0.7:
-        job_type = None
-    if job_type not in {"tech", "non-tech"}:
-        job_type = _classify_jd_type(jd_text, skills_all)
+    technical_skills = list(skill_payload.get("technical_skills") or [])
+    if not technical_skills and skills_all:
+        technical_skills = _filter_technical_skills(skills_all)
+    job_type = "tech" if technical_skills else "non-tech"
     state["job_type"] = job_type
-    if job_type == "tech":
-        technical_skills = list(getattr(profile, "technical_skills", []) or [])
-        if not technical_skills:
-            technical_skills = skills_all
+    if job_type == "tech" and technical_skills:
         skills_all = _filter_technical_skills(technical_skills)
     state["skills"] = list(skills_all)
     state["themes"] = []
+    if skills_all:
+        preview = ", ".join(skills_all[:25])
+        suffix = " ..." if len(skills_all) > 25 else ""
+        print(f"[QGEN_FROM_JD] skills ({len(skills_all)}): {preview}{suffix}", flush=True)
+    else:
+        print("[QGEN_FROM_JD] skills (0): none extracted", flush=True)
 
-    skill_groups = cluster_skills(skills_all) if skills_all else []
-    state["skill_groups"] = [list(g) for g in skill_groups]
+    if skills_all:
+        print(f"[QGEN_FROM_JD] clustering skills count={len(skills_all)}", flush=True)
+        skill_groups = cluster_skills(skills_all)
+        print(f"[QGEN_FROM_JD] clustering done groups={len(skill_groups)}", flush=True)
+    else:
+        skill_groups = []
 
     base_target = max(5, int(getattr(settings, "total_questions_from_jd", 10)))
+
+    state["skill_groups"] = [list(g) for g in skill_groups]
     questions: list[Dict[str, Any]] = []
     desired_total = base_target
+    min_skills_for_targeted = 3
 
-    if skill_groups:
-        group_alloc = [1 for _ in skill_groups]
-        total_alloc = sum(group_alloc)
-        idx = 0
-        while total_alloc < base_target:
-            if group_alloc[idx] < 4:
-                group_alloc[idx] += 1
-                total_alloc += 1
-            idx = (idx + 1) % len(group_alloc)
-            if idx == 0 and all(a >= 4 for a in group_alloc):
-                break
-        desired_total = max(base_target, total_alloc)
+    def _generate_from_jd_text(n: int) -> list[Dict[str, Any]]:
+        fallback_topic = (
+            "Generate interview questions that are strictly based on this job description.\n"
+            "Focus on key skills, tools, and responsibilities explicitly mentioned.\n"
+            f"JD snippet: {jd_text[:800]}"
+        )
+        fallback_slots = dict(slots)
+        fallback_slots["topic"] = fallback_topic
+        fallback_slots["n"] = str(n)
+        try:
+            return generate_from_topic(fallback_slots, n=n)
+        except Exception:
+            return []
 
-        for g_idx, group in enumerate(skill_groups):
-            if len(questions) >= desired_total:
-                break
-            need = group_alloc[g_idx]
-            topic = _build_skill_topic(group, need, strict_technical=(job_type == "tech"))
-            skill_slots = dict(slots)
-            skill_slots["topic"] = topic
-            skill_slots["n"] = str(need)
-            try:
-                qs = generate_from_topic(skill_slots, n=need)
-            except Exception:
-                qs = []
-            if not qs:
-                continue
-            for q in qs[:need]:
-                q.setdefault("meta", {})
-                if isinstance(q["meta"], dict):
-                    q["meta"].setdefault("skill_group", list(group))
-            questions.extend(qs[:need])
+    if skills_all and len(skills_all) >= min_skills_for_targeted:
+        # Single LLM call: include all skills in one prompt to avoid per-group latency.
+        topic = _build_skill_topic(skills_all, desired_total, strict_technical=(job_type == "tech"))
+        skill_slots = dict(slots)
+        skill_slots["topic"] = topic
+        skill_slots["n"] = str(desired_total)
+        try:
+            questions = generate_from_topic(skill_slots, n=desired_total)
+        except Exception:
+            questions = []
 
-    if job_type == "tech":
-        questions = _filter_non_technical_questions(questions)
+    if not questions:
+        questions = _generate_from_jd_text(base_target)
 
-    # If no skills detected or generation failed, fall back to a generic topic using JD text
+    if job_type == "tech" and questions:
+        filtered = _filter_questions_by_skill_terms(questions, skills_all)
+        # If filtering is too strict, keep the original set instead of returning nothing.
+        if filtered:
+            questions = filtered
+
+    # If still empty, fall back to a generic topic using JD text
     if not questions:
         fallback_topic = (
             "Generate practical interview questions for this job description.\n"
             "Focus on key skills and responsibilities mentioned.\n"
             f"JD snippet: {jd_text[:500]}"
         )
-        if job_type == "tech":
-            fallback_topic = (
-                "Generate strictly technical interview questions for this job description.\n"
-                "Avoid HR, behavioral, management, or soft-skill questions.\n"
-                f"JD snippet: {jd_text[:500]}"
-            )
         fallback_slots = dict(slots)
         fallback_slots["topic"] = fallback_topic
         fallback_slots["n"] = str(base_target)
@@ -577,8 +458,6 @@ def qgen_from_jd(state: GraphState) -> GraphState:
             fallback = generate_from_topic(fallback_slots, n=base_target)
         except Exception:
             fallback = []
-        if job_type == "tech":
-            fallback = _filter_non_technical_questions(fallback)
         questions.extend(fallback[:base_target])
 
     final_cap = desired_total if skill_groups else base_target
@@ -595,15 +474,18 @@ def qgen_from_jd(state: GraphState) -> GraphState:
 
     # Result line
     if not state["questions"]:
-        state["result"] = "[QGEN_FROM_JD] No questions could be generated from this JD."
+        if job_type == "tech":
+            state["result"] = "[QGEN_FROM_JD] No technical questions could be generated from this JD."
+        else:
+            state["result"] = "[QGEN_FROM_JD] No questions could be generated from this JD."
     else:
-        if skill_groups:
+        if skills_all:
+            label = "JD skill list"
+        elif skill_groups:
             label = f"{len(skill_groups)} skill cluster(s)"
         else:
             label = "general prompts"
-        state["result"] = (
-            f"Generated {len(state['questions'])} questions across {label}"
-        )
+        state["result"] = f"Generated {len(state['questions'])} questions across {label}"
     return state
 
 def qgen_topic(state: GraphState) -> GraphState:
@@ -722,6 +604,9 @@ def recommend_resources(state: GraphState) -> GraphState:
 def show_profile(state: GraphState) -> GraphState:
     slots = state.get("slots", {}) or {}
     summary = summarize_profile(slots, session_id=state.get("session_id"), user_id=state.get("user_id"))
+    # If the current session has no scores, fall back to the user's overall history.
+    if summary.get("total_answers", 0) == 0 and state.get("user_id"):
+        summary = summarize_profile(slots, session_id=None, user_id=state.get("user_id"))
     state["profile"] = summary
 
     total = summary.get("total_answers", 0)

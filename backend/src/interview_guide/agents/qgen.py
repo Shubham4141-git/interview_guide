@@ -1,11 +1,11 @@
 """
 Question Generator (topic-based)
-- uses Gemini via langchain-google-genai
+- uses OpenAI via langchain-openai
 - returns a small list of clean questions (default 5)
 """
 from pydantic import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from interview_guide.configuration import settings
 from typing import Dict, Any, List
 import re
@@ -59,9 +59,9 @@ def _requested_n(slots: Dict[str, Any], default: int) -> int:
     return max(_MIN_Q, min(default, _MAX_Q))
 
 def _llm():
-    if not settings.google_api_key:
-        raise RuntimeError("Missing GOOGLE_API_KEY (or GEMINI_API_KEY).")
-    return ChatGoogleGenerativeAI(model=settings.llm_model, api_key=settings.google_api_key, temperature=0.3)
+    if not settings.openai_api_key:
+        raise RuntimeError("Missing OPENAI_API_KEY.")
+    return ChatOpenAI(model=settings.llm_model_default, temperature=0.3)
 
 def generate_from_topic(slots: Dict[str, Any], n: int = 5) -> List[Dict[str, Any]]:
     topic = (slots.get("topic") or "").strip()
@@ -69,7 +69,7 @@ def generate_from_topic(slots: Dict[str, Any], n: int = 5) -> List[Dict[str, Any
         raise ValueError("QGEN_TOPIC requires a 'topic' slot.")
     n_final = _requested_n(slots, n)
     prompt = ChatPromptTemplate.from_template(_TEMPLATE)
-    chain = prompt | _llm().with_structured_output(QuestionsList)
+    chain = prompt | _llm().with_structured_output(QuestionsList, method="function_calling")
     resp: QuestionsList = chain.invoke({"topic": topic, "n": n_final})
     out = [{"text": q.text.strip(), "topic": topic, "difficulty": "auto"} for q in resp.questions]
     # ensure length respects requested n and removes empties

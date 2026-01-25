@@ -17,17 +17,16 @@ import re
 from collections import Counter
 from pydantic import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from interview_guide.configuration import settings
 
 # ---------------- LLM ----------------
 
 def _llm():
-    if not settings.google_api_key:
-        raise RuntimeError("Missing GOOGLE_API_KEY (or GEMINI_API_KEY).")
-    return ChatGoogleGenerativeAI(
-        model=settings.llm_model,
-        api_key=settings.google_api_key,
+    if not settings.openai_api_key:
+        raise RuntimeError("Missing OPENAI_API_KEY.")
+    return ChatOpenAI(
+        model=settings.llm_model_default,
         temperature=0.15,
     )
 
@@ -37,19 +36,25 @@ class JDOpenProfile(BaseModel):
     role: Optional[str] = None
     subroles: List[str] = Field(default_factory=list)
     themes: List[str] = Field(default_factory=list)  # free-text labels, 3–6 items
-    weights_by_theme: Any = Field(default_factory=dict)  # sum ~ 1.0
-    tasks: Any = Field(default_factory=list)     # 10–20 concise task statements
-    skills: Any = Field(default_factory=list)    # overall deduped skills/tools/methods (incl. soft skills if explicit)
-    technical_skills: Any = Field(default_factory=list)  # strictly technical skills/tools only
-    non_technical_skills: Any = Field(default_factory=list)  # soft skills, management, HR, ops
-    management_responsibilities: Any = Field(default_factory=list)  # people/process/stakeholder duties
+    weights_by_theme: Dict[str, float] = Field(default_factory=dict)  # sum ~ 1.0
+    tasks: List[str] = Field(default_factory=list)     # 10–20 concise task statements
+    skills: List[str] = Field(default_factory=list)    # overall deduped skills/tools/methods (incl. soft skills if explicit)
+    technical_skills: List[str] = Field(default_factory=list)  # strictly technical skills/tools only
+    non_technical_skills: List[str] = Field(default_factory=list)  # soft skills, management, HR, ops
+    management_responsibilities: List[str] = Field(default_factory=list)  # people/process/stakeholder duties
     job_type: Optional[str] = None  # "tech" | "non-tech"
     job_type_confidence: Optional[float] = None
-    contexts: Any = Field(default_factory=list)  # constraints/shifts/compliance/equipment/domain notes
+    contexts: List[str] = Field(default_factory=list)  # constraints/shifts/compliance/equipment/domain notes
 
 # For backward compatibility
 class SkillList(BaseModel):
     skills: List[str] = Field(default_factory=list)
+
+# Lightweight skill-only extraction
+class JDSkills(BaseModel):
+    skills: List[str] = Field(default_factory=list)
+    technical_skills: List[str] = Field(default_factory=list)
+    non_technical_skills: List[str] = Field(default_factory=list)
 
 # ---------------- Prompts ----------------
 
@@ -85,6 +90,25 @@ _TEMPLATE_PROFILE = (
     "\"contexts\":[\"Night shifts\",\"HIPAA environment\",\"Use of metal detector\"]}}"
 )
 
+# --- Skill-only prompt (step A) ---
+_SYSTEM_SKILLS = (
+    "You extract skills from a Job Description (JD). Return ONLY strict JSON with keys:\n"
+    "skills: ALL skills/tools/platforms/methods mentioned (deduped).\n"
+    "technical_skills: strictly technical skills/tools/platforms.\n"
+    "non_technical_skills: soft skills, leadership, coaching, communication, management.\n"
+    "Include acronyms and their full forms when possible (e.g., \"RAG (Retrieval-Augmented Generation)\").\n"
+    "Include job-specific keywords (e.g., \"feature engineering\", \"experiment design\").\n"
+    "Return ONLY valid JSON matching these keys. No extra text."
+)
+
+_TEMPLATE_SKILLS = (
+    "{system}\n\nJD:\n{jd_text}\n\n"
+    "Return JSON exactly like:\n"
+    "{{\"skills\":[\"Python\",\"Spark\",\"RAG (Retrieval-Augmented Generation)\"],"
+    "\"technical_skills\":[\"Python\",\"Spark\"],"
+    "\"non_technical_skills\":[\"Mentoring\",\"Stakeholder communication\"]}}"
+)
+
 # ---------------- Generic helpers / fallback ----------------
 
 _STOP = {
@@ -94,6 +118,78 @@ _STOP = {
 
 _SENT_SPLIT_RE = re.compile(r"[\n\.;!?]+\s*")
 _WORD_RE = re.compile(r"[A-Za-z][A-Za-z\-/+#]*")
+
+# Small canonical map for normalization
+_SKILL_CANON = {
+    "gcp": "Google Cloud",
+    "google cloud platform": "Google Cloud",
+    "google cloud": "Google Cloud",
+    "aws": "AWS",
+    "amazon web services": "AWS",
+    "azure": "Azure",
+    "pyspark": "Spark",
+    "py spark": "Spark",
+    "spark": "Spark",
+    "databricks": "Databricks",
+    "llm": "LLM",
+    "llms": "LLM",
+    "large language model": "LLM",
+    "large language models": "LLM",
+    "rag": "RAG (Retrieval-Augmented Generation)",
+    "retrieval augmented generation": "RAG (Retrieval-Augmented Generation)",
+    "ml": "Machine Learning",
+    "machine learning": "Machine Learning",
+    "ai": "AI",
+    "genai": "GenAI",
+    "slm": "SLM (Small Language Model)",
+    "small language model": "SLM (Small Language Model)",
+    "small language models": "SLM (Small Language Model)",
+    "nlp": "NLP",
+    "natural language processing": "NLP",
+    "etl": "ETL",
+    "elt": "ELT",
+    "hdfs": "HDFS",
+    "hive": "Hive",
+    "hadoop": "Hadoop",
+    "kafka": "Kafka",
+    "snowflake": "Snowflake",
+    "langchain": "LangChain",
+    "pandas": "Pandas",
+    "numpy": "NumPy",
+    "scikit-learn": "scikit-learn",
+    "sklearn": "scikit-learn",
+    "xgboost": "XGBoost",
+    "lightgbm": "LightGBM",
+    "mlflow": "MLflow",
+    "airflow": "Airflow",
+    "dbt": "dbt",
+    "terraform": "Terraform",
+    "docker": "Docker",
+    "kubernetes": "Kubernetes",
+    "postgres": "PostgreSQL",
+    "postgresql": "PostgreSQL",
+    "sql": "SQL",
+    "nosql": "NoSQL",
+    "feature engineering": "Feature Engineering",
+    "experiment design": "Experiment Design",
+    "data pipelines": "Data Pipelines",
+    "model deployment": "Model Deployment",
+    "model monitoring": "Model Monitoring",
+}
+
+_KNOWN_PHRASES = [
+    "feature engineering",
+    "experiment design",
+    "data pipelines",
+    "model deployment",
+    "model monitoring",
+    "model evaluation",
+    "cross validation",
+    "train test validation",
+    "prompt engineering",
+    "vector database",
+    "retrieval augmented generation",
+]
 
 
 def _dedupe_keep_order(items: List[str]) -> List[str]:
@@ -170,9 +266,52 @@ def _regex_skills(jd_text: str) -> List[str]:
             phrases.append(f"{a} {b}")
     # single tokens that look like skills
     singles = [t for t in raw if t[0].isupper() or len(t) >= 4]
-    skills = _dedupe_keep_order(phrases + singles)
+    # known lowercase phrases
+    lower = " ".join(jd_text.lower().split())
+    known = [p for p in _KNOWN_PHRASES if p in lower]
+    skills = _dedupe_keep_order(phrases + singles + [p.title() for p in known])
     # trim excessive list
     return skills[:80]
+
+def _normalize_skills(items: List[str]) -> List[str]:
+    out: List[str] = []
+    seen: Set[str] = set()
+    for s in items or []:
+        raw = str(s).strip()
+        if not raw:
+            continue
+        key = re.sub(r"\s+", " ", raw.lower().strip())
+        canon = _SKILL_CANON.get(key, raw)
+        canon_key = canon.lower()
+        if canon_key in seen:
+            continue
+        seen.add(canon_key)
+        out.append(canon)
+    return out
+
+def extract_skills_payload_from_slots(slots: Dict[str, Any]) -> Dict[str, List[str]]:
+    jd_text = (slots.get("jd_text") or "").strip()
+    if not jd_text:
+        raise ValueError("INGEST_JD/QGEN_FROM_JD requires 'jd_text' in slots.")
+
+    prompt = ChatPromptTemplate.from_template(_TEMPLATE_SKILLS)
+    llm = _llm()
+    chain = prompt | llm.with_structured_output(JDSkills, method="function_calling")
+
+    try:
+        print(f"[JD_SKILLS] Invoking LLM jd_len={len(jd_text)}", flush=True)
+        res: JDSkills = chain.invoke({"system": _SYSTEM_SKILLS, "jd_text": jd_text})
+        print("[JD_SKILLS] Using LLM skills", flush=True)
+        skills = _normalize_skills(res.skills or [])
+        tech = _normalize_skills(res.technical_skills or [])
+        nontech = _normalize_skills(res.non_technical_skills or [])
+        # Merge any missing technicals into overall skills
+        merged = _normalize_skills(skills + tech + nontech)
+        return {"skills": merged, "technical_skills": tech, "non_technical_skills": nontech}
+    except Exception as e:
+        print("[JD_SKILLS] Using fallback skills —", repr(e), flush=True)
+        fallback = _normalize_skills(_regex_skills(jd_text))
+        return {"skills": fallback, "technical_skills": [], "non_technical_skills": []}
 
 # ---------------- Public API ----------------
 
@@ -183,9 +322,10 @@ def extract_profile_from_slots(slots: Dict[str, Any]) -> JDOpenProfile:
 
     prompt = ChatPromptTemplate.from_template(_TEMPLATE_PROFILE)
     llm = _llm()
-    chain = prompt | llm.with_structured_output(JDOpenProfile)
+    chain = prompt | llm.with_structured_output(JDOpenProfile, method="function_calling")
 
     try:
+        print(f"[JD_PARSER] Invoking LLM jd_len={len(jd_text)}", flush=True)
         prof: JDOpenProfile = chain.invoke({"system": _SYSTEM_PROFILE, "jd_text": jd_text})
         print("[JD_PARSER] Using LLM profile")
         # --- Coerce fields in case the model returned JSON-as-strings ---

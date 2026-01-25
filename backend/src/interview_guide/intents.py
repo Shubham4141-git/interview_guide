@@ -1,6 +1,6 @@
 from enum import Enum
-from typing import List, Optional, Dict, Union, Any
-from pydantic import BaseModel, Field
+from typing import List, Optional
+from pydantic import BaseModel, Field, ConfigDict
 
 class IntentType(str, Enum):
     """All high-level actions the supervisor can route to."""
@@ -12,6 +12,17 @@ class IntentType(str, Enum):
     SHOW_PROFILE = "SHOW_PROFILE"
     UPDATE_PREFS = "UPDATE_PREFS"
     HELP = "HELP"
+
+
+class RouterPrefs(BaseModel):
+    """Explicit preference fields for router extraction (strict schema)."""
+
+    free_only: Optional[bool] = Field(None, description="Limit to free resources when true.")
+    time_per_week: Optional[float] = Field(None, description="Weekly time budget in hours.")
+    sources: Optional[List[str]] = Field(None, description="Preferred content sources.")
+
+    model_config = ConfigDict(extra="forbid")
+
 
 class Intent(BaseModel):
     """Structured output from the router (LLM classifier).
@@ -30,15 +41,13 @@ class Intent(BaseModel):
     topic: Optional[str] = Field(None, description="Topic/skill for question generation")
     answers: Optional[List[str]] = Field(None, description="One or more user answers to evaluate")
     skill: Optional[str] = Field(None, description="Skill to recommend resources for")
-    # prefs: Optional[Dict[str, Union[str, int, float, bool]]] = Field(
-    #     None, description="User preference overrides (e.g., free_only, time_per_week)"
-    # )
-    prefs: Optional[Union[Dict[str, Any], str]] = None
+    prefs: Optional[RouterPrefs] = Field(
+        None, description="User preference overrides (e.g., free_only, time_per_week, sources)"
+    )
     session_selector: Optional[str] = Field(
         None, description='Which prior session to use (e.g., "latest")'
     )
     notes: Optional[str] = Field(None, description="Short router note or clarification request")
     clarification_needed: bool = Field(False, description="If True, the router needs one clarifying answer before proceeding")
 
-    class Config:
-        extra = "ignore"
+    model_config = ConfigDict(extra="forbid")

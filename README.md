@@ -37,7 +37,9 @@ uv sync
 Create a `.env` file (do not commit it) and set the required API keys plus a database path for persistent storage. Keep secrets out of source control.
 
 ```
-GOOGLE_API_KEY=your_google_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
+LLM_MODEL_DEFAULT=gpt-5-nano
+LLM_MODEL_EVAL=gpt-4o-mini
 TAVILY_API_KEY=your_tavily_api_key_here
 INTERVIEW_GUIDE_DB=/absolute/path/to/interview_guide.db
 ```
@@ -52,7 +54,6 @@ To launch the FastAPI backend (which powers the UI), run:
 
 ```bash
 cd backend
-uv run uvicorn api_server:app --reload
 ```
 
 `api_server.py` ensures the `src/` directory is on `PYTHONPATH`, so no extra configuration is required. Once running, all endpoints are available under `http://localhost:8000/api`.

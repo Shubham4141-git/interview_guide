@@ -1,0 +1,343 @@
+{
+    "summary": {
+        "records": 30,
+        "band_accuracy": 0.9667,
+        "score_accuracy": 0.5667,
+        "mae_avg": 0.4333,
+        "latency_ms_avg": 2555.8,
+        "errors": 0,
+        "token_estimates": "approx (chars/4 heuristic)"
+    },
+    "details": [
+        {
+            "id": "q01_good",
+            "score": 5,
+            "feedback": "The answer accurately describes the differences between INNER JOIN, LEFT JOIN, and FULL OUTER JOIN with clear definitions. To improve, consider providing an example to illustrate each join type more effectively.",
+            "pred_band": "good",
+            "expected_band": "good",
+            "band_correct": true,
+            "expected_score": 5,
+            "score_exact": true,
+            "token_estimate": 348
+        },
+        {
+            "id": "q01_ok",
+            "score": 3,
+            "feedback": "The core ideas of the joins are mentioned correctly, but the explanation lacks depth and specific examples. Including how unmatched rows are handled in FULL OUTER JOIN would improve clarity.",
+            "pred_band": "ok",
+            "expected_band": "ok",
+            "band_correct": true,
+            "expected_score": 3,
+            "score_exact": true,
+            "token_estimate": 322
+        },
+        {
+            "id": "q01_bad",
+            "score": 0,
+            "feedback": "The answer is factually incorrect as it misrepresents the functions of INNER JOIN, LEFT JOIN, and FULL OUTER JOIN. A correct explanation should define each join type and describe how they handle matching and non-matching rows between tables.",
+            "pred_band": "bad",
+            "expected_band": "bad",
+            "band_correct": true,
+            "expected_score": 1,
+            "score_exact": false,
+            "token_estimate": 314
+        },
+        {
+            "id": "q02_good",
+            "score": 5,
+            "feedback": "The answer is accurate, complete, and well-structured, clearly explaining what an index is and when it can negatively impact performance. To improve, consider providing an example of a scenario where an index might hurt performance.",
+            "pred_band": "good",
+            "expected_band": "good",
+            "band_correct": true,
+            "expected_score": 5,
+            "score_exact": true,
+            "token_estimate": 356
+        },
+        {
+            "id": "q02_ok",
+            "score": 3,
+            "feedback": "The answer correctly identifies the purpose of an index and mentions a potential drawback, which is good. However, it lacks depth regarding how indexes can hurt performance in specific scenarios, such as during complex queries or when maintaining indexes during data modifications.",
+            "pred_band": "ok",
+            "expected_band": "ok",
+            "band_correct": true,
+            "expected_score": 3,
+            "score_exact": true,
+            "token_estimate": 303
+        },
+        {
+            "id": "q02_bad",
+            "score": 0,
+            "feedback": "The answer is factually incorrect; an index is not a backup copy but a data structure that improves query performance. To improve, focus on defining what an index is and explain scenarios where it can negatively impact performance, such as during write operations.",
+            "pred_band": "bad",
+            "expected_band": "bad",
+            "band_correct": true,
+            "expected_score": 1,
+            "score_exact": false,
+            "token_estimate": 301
+        },
+        {
+            "id": "q03_good",
+            "score": 5,
+            "feedback": "This answer is accurate, complete, and well-structured, clearly defining each component of ACID. To enhance it further, consider providing a real-world example of how ACID properties are applied in a database system.",
+            "pred_band": "good",
+            "expected_band": "good",
+            "band_correct": true,
+            "expected_score": 5,
+            "score_exact": true,
+            "token_estimate": 342
+        },
+        {
+            "id": "q03_ok",
+            "score": 3,
+            "feedback": "The core idea of ACID is correctly identified, but the explanation lacks depth and specific examples of each component. To improve, consider elaborating on how each principle contributes to transaction reliability.",
+            "pred_band": "ok",
+            "expected_band": "ok",
+            "band_correct": true,
+            "expected_score": 3,
+            "score_exact": true,
+            "token_estimate": 303
+        },
+        {
+            "id": "q03_bad",
+            "score": 0,
+            "feedback": "The answer is factually incorrect as ACID refers to a set of properties (Atomicity, Consistency, Isolation, Durability) that guarantee reliable transactions in databases, not a query language. To improve, focus on defining each component of ACID and its importance in database transactions.",
+            "pred_band": "bad",
+            "expected_band": "bad",
+            "band_correct": true,
+            "expected_score": 1,
+            "score_exact": false,
+            "token_estimate": 289
+        },
+        {
+            "id": "q04_good",
+            "score": 5,
+            "feedback": "This answer accurately explains the purpose and functionality of window functions compared to GROUP BY, highlighting their key differences effectively. To enhance the response, consider providing a specific example of a window function in action.",
+            "pred_band": "good",
+            "expected_band": "good",
+            "band_correct": true,
+            "expected_score": 5,
+            "score_exact": true,
+            "token_estimate": 357
+        },
+        {
+            "id": "q04_ok",
+            "score": 3,
+            "feedback": "The answer correctly identifies the purpose of window functions and distinguishes them from GROUP BY, but lacks depth and specific examples. To improve, include more details on how window functions operate over a specified range of rows and provide an example of their use.",
+            "pred_band": "ok",
+            "expected_band": "ok",
+            "band_correct": true,
+            "expected_score": 3,
+            "score_exact": true,
+            "token_estimate": 317
+        },
+        {
+            "id": "q04_bad",
+            "score": 0,
+            "feedback": "This answer is off-topic and factually incorrect. It confuses SQL concepts with unrelated computer functions.",
+            "pred_band": "bad",
+            "expected_band": "bad",
+            "band_correct": true,
+            "expected_score": 1,
+            "score_exact": false,
+            "token_estimate": 305
+        },
+        {
+            "id": "q05_good",
+            "score": 4,
+            "feedback": "The answer accurately describes the core differences between lists and tuples, highlighting mutability and use cases. However, it could benefit from more examples or a deeper explanation of when to choose one over the other in specific scenarios.",
+            "pred_band": "good",
+            "expected_band": "good",
+            "band_correct": true,
+            "expected_score": 5,
+            "score_exact": false,
+            "token_estimate": 348
+        },
+        {
+            "id": "q05_ok",
+            "score": 3,
+            "feedback": "The answer correctly identifies the mutability of lists and tuples, which is a core idea. However, it lacks depth and could benefit from examples of use cases for each type.",
+            "pred_band": "ok",
+            "expected_band": "ok",
+            "band_correct": true,
+            "expected_score": 3,
+            "score_exact": true,
+            "token_estimate": 310
+        },
+        {
+            "id": "q05_bad",
+            "score": 0,
+            "feedback": "The answer is factually incorrect; tuples do not run in parallel threads, and lists can hold any data type, not just strings. A better response would include the key differences between lists and tuples, such as mutability and use cases.",
+            "pred_band": "bad",
+            "expected_band": "bad",
+            "band_correct": true,
+            "expected_score": 1,
+            "score_exact": false,
+            "token_estimate": 308
+        },
+        {
+            "id": "q06_good",
+            "score": 5,
+            "feedback": "The answer is accurate, complete, and well-structured, clearly explaining the concept of generators and their benefits. To enhance it further, you could provide an example of a generator function to illustrate its usage.",
+            "pred_band": "good",
+            "expected_band": "good",
+            "band_correct": true,
+            "expected_score": 5,
+            "score_exact": true,
+            "token_estimate": 336
+        },
+        {
+            "id": "q06_ok",
+            "score": 4,
+            "feedback": "The answer correctly identifies the core idea of generators and their memory efficiency. However, it could be improved by explaining how generators are created using the 'yield' keyword and providing an example of their use case.",
+            "pred_band": "good",
+            "expected_band": "ok",
+            "band_correct": false,
+            "expected_score": 3,
+            "score_exact": false,
+            "token_estimate": 306
+        },
+        {
+            "id": "q06_bad",
+            "score": 0,
+            "feedback": "This answer is off-topic and factually incorrect regarding the definition of a generator in Python. A generator is actually a type of iterable that allows you to iterate through a sequence of values without storing them all in memory at once.",
+            "pred_band": "bad",
+            "expected_band": "bad",
+            "band_correct": true,
+            "expected_score": 1,
+            "score_exact": false,
+            "token_estimate": 296
+        },
+        {
+            "id": "q07_good",
+            "score": 5,
+            "feedback": "This answer accurately explains the GIL and its implications for both CPU-bound and I/O-bound programs. To enhance the response, consider providing an example of a scenario where multiprocessing is preferred over threading.",
+            "pred_band": "good",
+            "expected_band": "good",
+            "band_correct": true,
+            "expected_score": 5,
+            "score_exact": true,
+            "token_estimate": 358
+        },
+        {
+            "id": "q07_ok",
+            "score": 3,
+            "feedback": "The answer correctly identifies the GIL as a lock and mentions its impact on multithreading, which is a strength. However, it lacks depth regarding how the GIL works and its implications for CPU-bound vs I/O-bound tasks.",
+            "pred_band": "ok",
+            "expected_band": "ok",
+            "band_correct": true,
+            "expected_score": 3,
+            "score_exact": true,
+            "token_estimate": 310
+        },
+        {
+            "id": "q07_bad",
+            "score": 0,
+            "feedback": "The answer is factually incorrect as it misidentifies the GIL and misunderstands its implications. A correct response should explain that GIL stands for Global Interpreter Lock, which affects multi-threading in Python, potentially limiting performance gains from using multiple threads.",
+            "pred_band": "bad",
+            "expected_band": "bad",
+            "band_correct": true,
+            "expected_score": 1,
+            "score_exact": false,
+            "token_estimate": 294
+        },
+        {
+            "id": "q08_good",
+            "score": 4,
+            "feedback": "The answer is mostly correct and clear, effectively explaining the use of try/except and finally. However, it could improve by providing a specific example of an exception handling scenario.",
+            "pred_band": "good",
+            "expected_band": "good",
+            "band_correct": true,
+            "expected_score": 5,
+            "score_exact": false,
+            "token_estimate": 358
+        },
+        {
+            "id": "q08_ok",
+            "score": 3,
+            "feedback": "The core idea of using try and except is correct, and mentioning 'finally' is a good start. However, the answer lacks depth regarding the types of exceptions and specific scenarios where 'finally' is particularly useful.",
+            "pred_band": "ok",
+            "expected_band": "ok",
+            "band_correct": true,
+            "expected_score": 3,
+            "score_exact": true,
+            "token_estimate": 308
+        },
+        {
+            "id": "q08_bad",
+            "score": 0,
+            "feedback": "The answer is off-topic and factually incorrect; print statements do not prevent exceptions. Additionally, 'finally' is not used to end the program but to execute code regardless of whether an exception occurred.",
+            "pred_band": "bad",
+            "expected_band": "bad",
+            "band_correct": true,
+            "expected_score": 1,
+            "score_exact": false,
+            "token_estimate": 308
+        },
+        {
+            "id": "q09_good",
+            "score": 5,
+            "feedback": "The answer is accurate, complete, and well-structured, clearly explaining time complexity and how to estimate it for nested loops. To enhance the response, consider providing an example to illustrate the concept further.",
+            "pred_band": "good",
+            "expected_band": "good",
+            "band_correct": true,
+            "expected_score": 5,
+            "score_exact": true,
+            "token_estimate": 350
+        },
+        {
+            "id": "q09_ok",
+            "score": 3,
+            "feedback": "The core idea of time complexity is present, and the mention of O(n^2) for nested loops is correct. However, the answer lacks depth in explaining how to estimate time complexity and does not address variations in loop conditions.",
+            "pred_band": "ok",
+            "expected_band": "ok",
+            "band_correct": true,
+            "expected_score": 3,
+            "score_exact": true,
+            "token_estimate": 320
+        },
+        {
+            "id": "q09_bad",
+            "score": 0,
+            "feedback": "The answer is off-topic and factually incorrect; time complexity refers to the computational complexity that describes the amount of time it takes to run an algorithm as a function of the length of the input. Additionally, nested loops typically have a time complexity of O(n^2) or worse, not O(1).",
+            "pred_band": "bad",
+            "expected_band": "bad",
+            "band_correct": true,
+            "expected_score": 1,
+            "score_exact": false,
+            "token_estimate": 307
+        },
+        {
+            "id": "q10_good",
+            "score": 5,
+            "feedback": "This answer accurately captures the core concepts of bias and variance in machine learning, providing clear definitions and implications for model performance. To enhance the response, consider including an example or a visual analogy to illustrate the trade-off more effectively.",
+            "pred_band": "good",
+            "expected_band": "good",
+            "band_correct": true,
+            "expected_score": 5,
+            "score_exact": true,
+            "token_estimate": 363
+        },
+        {
+            "id": "q10_ok",
+            "score": 3,
+            "feedback": "The core idea of bias and variance is present, but the explanation lacks depth and precision. Including definitions and examples of how bias and variance affect model performance would strengthen the answer.",
+            "pred_band": "ok",
+            "expected_band": "ok",
+            "band_correct": true,
+            "expected_score": 3,
+            "score_exact": true,
+            "token_estimate": 302
+        },
+        {
+            "id": "q10_bad",
+            "score": 0,
+            "feedback": "The answer is off-topic and factually incorrect; bias and variance in machine learning refer to different concepts related to model performance, not dataset politics or GPU size. A correct explanation should define bias as the error due to overly simplistic assumptions in the learning algorithm and variance as the error due to excessive complexity in the model.",
+            "pred_band": "bad",
+            "expected_band": "bad",
+            "band_correct": true,
+            "expected_score": 1,
+            "score_exact": false,
+            "token_estimate": 304
+        }
+    ]
+}

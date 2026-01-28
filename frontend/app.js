@@ -168,6 +168,15 @@ function renderTurn(turn) {
         .join("")}</ul></div>`
     );
   }
+  if (turn.state.skill_groups?.length) {
+    const groups = turn.state.skill_groups
+      .map((group, idx) => {
+        const items = Array.isArray(group) ? group.join(", ") : String(group);
+        return `<li><strong>Group ${idx + 1}:</strong> ${items}</li>`;
+      })
+      .join("");
+    fragments.push(`<div><strong>Skill clusters</strong><ul>${groups}</ul></div>`);
+  }
   if (turn.state.scores?.length) {
     fragments.push(
       `<div><strong>Scores</strong><ul>${turn.state.scores

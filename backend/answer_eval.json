@@ -1,0 +1,153 @@
+{
+    "summary": {
+        "records": 10,
+        "intent_accuracy": 1.0,
+        "precision_avg": 0.2708,
+        "recall_avg": 0.5459,
+        "f1_avg": 0.3362,
+        "support_rate_avg": 0.9595,
+        "latency_ms_avg": {
+            "router": 15085.55,
+            "skills": 64364.36,
+            "qgen": 19891.39,
+            "judge": 0.0,
+            "answer_gen": 31519.36,
+            "answer_judge": 0.0
+        },
+        "answer_alignment_avg": 0.0,
+        "errors": 10,
+        "token_estimates": "approx (chars/4 heuristic)"
+    },
+    "details": [
+        {
+            "id": "jd_001",
+            "intent": "INGEST_JD",
+            "intent_correct": true,
+            "precision": 0.1111,
+            "recall": 0.8,
+            "f1": 0.1951,
+            "support_rate": 0.7917,
+            "pred_skills_count": 72,
+            "expected_skills_count": 10,
+            "questions_count": 10,
+            "error": "KeyError('Input to ChatPromptTemplate is missing variables {\\'\"expected_band\"\\'}.  Expected: [\\'\"expected_band\"\\', \\'answer\\', \\'feedback\\', \\'question\\', \\'score\\', \\'system\\'] Received: [\\'system\\', \\'question\\', \\'answer\\', \\'score\\', \\'feedback\\']\\nNote: if you intended {\"expected_band\"} to be part of the string and not a variable, please escape it with double curly braces like: \\'{{\"expected_band\"}}\\'.\\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/INVALID_PROMPT_INPUT ')"
+        },
+        {
+            "id": "jd_002",
+            "intent": "INGEST_JD",
+            "intent_correct": true,
+            "precision": 0.3182,
+            "recall": 0.7,
+            "f1": 0.4375,
+            "support_rate": 1.0,
+            "pred_skills_count": 22,
+            "expected_skills_count": 10,
+            "questions_count": 10,
+            "error": "KeyError('Input to ChatPromptTemplate is missing variables {\\'\"expected_band\"\\'}.  Expected: [\\'\"expected_band\"\\', \\'answer\\', \\'feedback\\', \\'question\\', \\'score\\', \\'system\\'] Received: [\\'system\\', \\'question\\', \\'answer\\', \\'score\\', \\'feedback\\']\\nNote: if you intended {\"expected_band\"} to be part of the string and not a variable, please escape it with double curly braces like: \\'{{\"expected_band\"}}\\'.\\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/INVALID_PROMPT_INPUT ')"
+        },
+        {
+            "id": "jd_003",
+            "intent": "INGEST_JD",
+            "intent_correct": true,
+            "precision": 0.5714,
+            "recall": 0.8889,
+            "f1": 0.6957,
+            "support_rate": 1.0,
+            "pred_skills_count": 14,
+            "expected_skills_count": 9,
+            "questions_count": 10,
+            "error": "KeyError('Input to ChatPromptTemplate is missing variables {\\'\"expected_band\"\\'}.  Expected: [\\'\"expected_band\"\\', \\'answer\\', \\'feedback\\', \\'question\\', \\'score\\', \\'system\\'] Received: [\\'system\\', \\'question\\', \\'answer\\', \\'score\\', \\'feedback\\']\\nNote: if you intended {\"expected_band\"} to be part of the string and not a variable, please escape it with double curly braces like: \\'{{\"expected_band\"}}\\'.\\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/INVALID_PROMPT_INPUT ')"
+        },
+        {
+            "id": "jd_004",
+            "intent": "INGEST_JD",
+            "intent_correct": true,
+            "precision": 0.5385,
+            "recall": 0.7778,
+            "f1": 0.6364,
+            "support_rate": 1.0,
+            "pred_skills_count": 13,
+            "expected_skills_count": 9,
+            "questions_count": 10,
+            "error": "KeyError('Input to ChatPromptTemplate is missing variables {\\'\"expected_band\"\\'}.  Expected: [\\'\"expected_band\"\\', \\'answer\\', \\'feedback\\', \\'question\\', \\'score\\', \\'system\\'] Received: [\\'system\\', \\'question\\', \\'answer\\', \\'score\\', \\'feedback\\']\\nNote: if you intended {\"expected_band\"} to be part of the string and not a variable, please escape it with double curly braces like: \\'{{\"expected_band\"}}\\'.\\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/INVALID_PROMPT_INPUT ')"
+        },
+        {
+            "id": "jd_005",
+            "intent": "INGEST_JD",
+            "intent_correct": true,
+            "precision": 0.6923,
+            "recall": 0.6923,
+            "f1": 0.6923,
+            "support_rate": 1.0,
+            "pred_skills_count": 13,
+            "expected_skills_count": 13,
+            "questions_count": 10,
+            "error": "KeyError('Input to ChatPromptTemplate is missing variables {\\'\"expected_band\"\\'}.  Expected: [\\'\"expected_band\"\\', \\'answer\\', \\'feedback\\', \\'question\\', \\'score\\', \\'system\\'] Received: [\\'system\\', \\'question\\', \\'answer\\', \\'score\\', \\'feedback\\']\\nNote: if you intended {\"expected_band\"} to be part of the string and not a variable, please escape it with double curly braces like: \\'{{\"expected_band\"}}\\'.\\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/INVALID_PROMPT_INPUT ')"
+        },
+        {
+            "id": "jd_006",
+            "intent": "INGEST_JD",
+            "intent_correct": true,
+            "precision": 0.1132,
+            "recall": 0.6,
+            "f1": 0.1905,
+            "support_rate": 0.8302,
+            "pred_skills_count": 53,
+            "expected_skills_count": 10,
+            "questions_count": 10,
+            "error": "KeyError('Input to ChatPromptTemplate is missing variables {\\'\"expected_band\"\\'}.  Expected: [\\'\"expected_band\"\\', \\'answer\\', \\'feedback\\', \\'question\\', \\'score\\', \\'system\\'] Received: [\\'system\\', \\'question\\', \\'answer\\', \\'score\\', \\'feedback\\']\\nNote: if you intended {\"expected_band\"} to be part of the string and not a variable, please escape it with double curly braces like: \\'{{\"expected_band\"}}\\'.\\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/INVALID_PROMPT_INPUT ')"
+        },
+        {
+            "id": "jd_007",
+            "intent": "INGEST_JD",
+            "intent_correct": true,
+            "precision": 0.0588,
+            "recall": 0.2,
+            "f1": 0.0909,
+            "support_rate": 1.0,
+            "pred_skills_count": 34,
+            "expected_skills_count": 10,
+            "questions_count": 10,
+            "error": "KeyError('Input to ChatPromptTemplate is missing variables {\\'\"expected_band\"\\'}.  Expected: [\\'\"expected_band\"\\', \\'answer\\', \\'feedback\\', \\'question\\', \\'score\\', \\'system\\'] Received: [\\'system\\', \\'question\\', \\'answer\\', \\'score\\', \\'feedback\\']\\nNote: if you intended {\"expected_band\"} to be part of the string and not a variable, please escape it with double curly braces like: \\'{{\"expected_band\"}}\\'.\\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/INVALID_PROMPT_INPUT ')"
+        },
+        {
+            "id": "jd_008",
+            "intent": "INGEST_JD",
+            "intent_correct": true,
+            "precision": 0.1667,
+            "recall": 0.3,
+            "f1": 0.2143,
+            "support_rate": 1.0,
+            "pred_skills_count": 18,
+            "expected_skills_count": 10,
+            "questions_count": 10,
+            "error": "KeyError('Input to ChatPromptTemplate is missing variables {\\'\"expected_band\"\\'}.  Expected: [\\'\"expected_band\"\\', \\'answer\\', \\'feedback\\', \\'question\\', \\'score\\', \\'system\\'] Received: [\\'system\\', \\'question\\', \\'answer\\', \\'score\\', \\'feedback\\']\\nNote: if you intended {\"expected_band\"} to be part of the string and not a variable, please escape it with double curly braces like: \\'{{\"expected_band\"}}\\'.\\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/INVALID_PROMPT_INPUT ')"
+        },
+        {
+            "id": "jd_009",
+            "intent": "INGEST_JD",
+            "intent_correct": true,
+            "precision": 0.027,
+            "recall": 0.2,
+            "f1": 0.0476,
+            "support_rate": 0.973,
+            "pred_skills_count": 74,
+            "expected_skills_count": 10,
+            "questions_count": 10,
+            "error": "KeyError('Input to ChatPromptTemplate is missing variables {\\'\"expected_band\"\\'}.  Expected: [\\'\"expected_band\"\\', \\'answer\\', \\'feedback\\', \\'question\\', \\'score\\', \\'system\\'] Received: [\\'system\\', \\'question\\', \\'answer\\', \\'score\\', \\'feedback\\']\\nNote: if you intended {\"expected_band\"} to be part of the string and not a variable, please escape it with double curly braces like: \\'{{\"expected_band\"}}\\'.\\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/INVALID_PROMPT_INPUT ')"
+        },
+        {
+            "id": "jd_010",
+            "intent": "INGEST_JD",
+            "intent_correct": true,
+            "precision": 0.1111,
+            "recall": 0.3,
+            "f1": 0.1622,
+            "support_rate": 1.0,
+            "pred_skills_count": 27,
+            "expected_skills_count": 10,
+            "questions_count": 10,
+            "error": "KeyError('Input to ChatPromptTemplate is missing variables {\\'\"expected_band\"\\'}.  Expected: [\\'\"expected_band\"\\', \\'answer\\', \\'feedback\\', \\'question\\', \\'score\\', \\'system\\'] Received: [\\'system\\', \\'question\\', \\'answer\\', \\'score\\', \\'feedback\\']\\nNote: if you intended {\"expected_band\"} to be part of the string and not a variable, please escape it with double curly braces like: \\'{{\"expected_band\"}}\\'.\\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langchain/errors/INVALID_PROMPT_INPUT ')"
+        }
+    ]
+}

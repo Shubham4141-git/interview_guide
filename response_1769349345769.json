@@ -1,0 +1,870 @@
+{
+  "summary": {
+    "records": 50,
+    "intent_accuracy": 1,
+    "precision_avg": 0.2519,
+    "recall_avg": 0.5002,
+    "f1_avg": 0.3131,
+    "support_rate_avg": 0.974,
+    "latency_ms_avg": {
+      "router": 11144.52,
+      "skills": 44549.03,
+      "qgen": 15313.56,
+      "judge": 0
+    },
+    "errors": 0,
+    "token_estimates": "approx (chars/4 heuristic)"
+  },
+  "details": [
+    {
+      "id": "jd_001",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.4,
+      "recall": 0.6,
+      "f1": 0.48,
+      "support_rate": 1,
+      "pred_skills_count": 15,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 377,
+        "skills": 367,
+        "qgen": 110
+      }
+    },
+    {
+      "id": "jd_002",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.4375,
+      "recall": 0.7,
+      "f1": 0.5385,
+      "support_rate": 1,
+      "pred_skills_count": 16,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 372,
+        "skills": 362,
+        "qgen": 113
+      }
+    },
+    {
+      "id": "jd_003",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.1667,
+      "recall": 1,
+      "f1": 0.2857,
+      "support_rate": 0.8704,
+      "pred_skills_count": 54,
+      "expected_skills_count": 9,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 365,
+        "skills": 355,
+        "qgen": 149
+      }
+    },
+    {
+      "id": "jd_004",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.18,
+      "recall": 1,
+      "f1": 0.3051,
+      "support_rate": 0.78,
+      "pred_skills_count": 50,
+      "expected_skills_count": 9,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 342,
+        "skills": 333,
+        "qgen": 157
+      }
+    },
+    {
+      "id": "jd_005",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.75,
+      "recall": 0.6923,
+      "f1": 0.72,
+      "support_rate": 1,
+      "pred_skills_count": 12,
+      "expected_skills_count": 13,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 349,
+        "skills": 339,
+        "qgen": 93
+      }
+    },
+    {
+      "id": "jd_006",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.1132,
+      "recall": 0.6,
+      "f1": 0.1905,
+      "support_rate": 0.8302,
+      "pred_skills_count": 53,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 350,
+        "skills": 341,
+        "qgen": 145
+      }
+    },
+    {
+      "id": "jd_007",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.0488,
+      "recall": 0.2,
+      "f1": 0.0784,
+      "support_rate": 1,
+      "pred_skills_count": 41,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 552,
+        "skills": 542,
+        "qgen": 173
+      }
+    },
+    {
+      "id": "jd_008",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.0256,
+      "recall": 0.2,
+      "f1": 0.0455,
+      "support_rate": 0.9744,
+      "pred_skills_count": 78,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 440,
+        "skills": 430,
+        "qgen": 141
+      }
+    },
+    {
+      "id": "jd_009",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.1379,
+      "recall": 0.4,
+      "f1": 0.2051,
+      "support_rate": 1,
+      "pred_skills_count": 29,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 468,
+        "skills": 459,
+        "qgen": 178
+      }
+    },
+    {
+      "id": "jd_010",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.0125,
+      "recall": 0.1,
+      "f1": 0.0222,
+      "support_rate": 0.9875,
+      "pred_skills_count": 80,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 529,
+        "skills": 520,
+        "qgen": 145
+      }
+    },
+    {
+      "id": "jd_011",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.0667,
+      "recall": 0.25,
+      "f1": 0.1053,
+      "support_rate": 1,
+      "pred_skills_count": 30,
+      "expected_skills_count": 8,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 457,
+        "skills": 448,
+        "qgen": 191
+      }
+    },
+    {
+      "id": "jd_012",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.1,
+      "recall": 0.3,
+      "f1": 0.15,
+      "support_rate": 1,
+      "pred_skills_count": 30,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 537,
+        "skills": 528,
+        "qgen": 199
+      }
+    },
+    {
+      "id": "jd_013",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.0513,
+      "recall": 0.2,
+      "f1": 0.0816,
+      "support_rate": 1,
+      "pred_skills_count": 39,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 491,
+        "skills": 481,
+        "qgen": 181
+      }
+    },
+    {
+      "id": "jd_014",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.0909,
+      "recall": 0.5,
+      "f1": 0.1538,
+      "support_rate": 1,
+      "pred_skills_count": 55,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 683,
+        "skills": 673,
+        "qgen": 215
+      }
+    },
+    {
+      "id": "jd_015",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.05,
+      "recall": 0.4,
+      "f1": 0.0889,
+      "support_rate": 0.9875,
+      "pred_skills_count": 80,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 612,
+        "skills": 602,
+        "qgen": 150
+      }
+    },
+    {
+      "id": "jd_016",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.125,
+      "recall": 0.3,
+      "f1": 0.1765,
+      "support_rate": 1,
+      "pred_skills_count": 24,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 535,
+        "skills": 525,
+        "qgen": 182
+      }
+    },
+    {
+      "id": "jd_017",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.0267,
+      "recall": 0.2222,
+      "f1": 0.0476,
+      "support_rate": 0.9467,
+      "pred_skills_count": 75,
+      "expected_skills_count": 9,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 477,
+        "skills": 467,
+        "qgen": 141
+      }
+    },
+    {
+      "id": "jd_018",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.0625,
+      "recall": 0.2,
+      "f1": 0.0952,
+      "support_rate": 1,
+      "pred_skills_count": 32,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 579,
+        "skills": 569,
+        "qgen": 192
+      }
+    },
+    {
+      "id": "jd_019",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.0143,
+      "recall": 0.1111,
+      "f1": 0.0253,
+      "support_rate": 0.9143,
+      "pred_skills_count": 70,
+      "expected_skills_count": 9,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 452,
+        "skills": 442,
+        "qgen": 145
+      }
+    },
+    {
+      "id": "jd_020",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.1818,
+      "recall": 0.4444,
+      "f1": 0.2581,
+      "support_rate": 1,
+      "pred_skills_count": 22,
+      "expected_skills_count": 9,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 483,
+        "skills": 473,
+        "qgen": 189
+      }
+    },
+    {
+      "id": "jd_021",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.0125,
+      "recall": 0.1111,
+      "f1": 0.0225,
+      "support_rate": 0.9875,
+      "pred_skills_count": 80,
+      "expected_skills_count": 9,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 470,
+        "skills": 460,
+        "qgen": 141
+      }
+    },
+    {
+      "id": "jd_022",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.0833,
+      "recall": 0.2,
+      "f1": 0.1176,
+      "support_rate": 1,
+      "pred_skills_count": 24,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 512,
+        "skills": 503,
+        "qgen": 177
+      }
+    },
+    {
+      "id": "jd_023",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.0375,
+      "recall": 0.3,
+      "f1": 0.0667,
+      "support_rate": 0.9375,
+      "pred_skills_count": 80,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 519,
+        "skills": 509,
+        "qgen": 143
+      }
+    },
+    {
+      "id": "jd_024",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.12,
+      "recall": 0.3,
+      "f1": 0.1714,
+      "support_rate": 1,
+      "pred_skills_count": 25,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 518,
+        "skills": 509,
+        "qgen": 198
+      }
+    },
+    {
+      "id": "jd_025",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.0833,
+      "recall": 0.1111,
+      "f1": 0.0952,
+      "support_rate": 1,
+      "pred_skills_count": 12,
+      "expected_skills_count": 9,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 462,
+        "skills": 452,
+        "qgen": 117
+      }
+    },
+    {
+      "id": "jd_026",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "support_rate": 1,
+      "pred_skills_count": 25,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 490,
+        "skills": 480,
+        "qgen": 250
+      }
+    },
+    {
+      "id": "jd_027",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.025,
+      "recall": 0.2,
+      "f1": 0.0444,
+      "support_rate": 0.975,
+      "pred_skills_count": 80,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 528,
+        "skills": 518,
+        "qgen": 147
+      }
+    },
+    {
+      "id": "jd_028",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "support_rate": 1,
+      "pred_skills_count": 19,
+      "expected_skills_count": 9,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 503,
+        "skills": 494,
+        "qgen": 156
+      }
+    },
+    {
+      "id": "jd_029",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.5333,
+      "recall": 0.8,
+      "f1": 0.64,
+      "support_rate": 1,
+      "pred_skills_count": 15,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 439,
+        "skills": 429,
+        "qgen": 108
+      }
+    },
+    {
+      "id": "jd_030",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.1167,
+      "recall": 0.7,
+      "f1": 0.2,
+      "support_rate": 0.7833,
+      "pred_skills_count": 60,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 383,
+        "skills": 373,
+        "qgen": 146
+      }
+    },
+    {
+      "id": "jd_031",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.3571,
+      "recall": 0.5,
+      "f1": 0.4167,
+      "support_rate": 1,
+      "pred_skills_count": 14,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 376,
+        "skills": 366,
+        "qgen": 113
+      }
+    },
+    {
+      "id": "jd_032",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.45,
+      "recall": 0.75,
+      "f1": 0.5625,
+      "support_rate": 1,
+      "pred_skills_count": 20,
+      "expected_skills_count": 12,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 396,
+        "skills": 386,
+        "qgen": 120
+      }
+    },
+    {
+      "id": "jd_033",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.5,
+      "recall": 0.6,
+      "f1": 0.5455,
+      "support_rate": 1,
+      "pred_skills_count": 12,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 401,
+        "skills": 391,
+        "qgen": 108
+      }
+    },
+    {
+      "id": "jd_034",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.4118,
+      "recall": 0.7,
+      "f1": 0.5185,
+      "support_rate": 1,
+      "pred_skills_count": 17,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 422,
+        "skills": 412,
+        "qgen": 130
+      }
+    },
+    {
+      "id": "jd_035",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.4074,
+      "recall": 0.9167,
+      "f1": 0.5641,
+      "support_rate": 1,
+      "pred_skills_count": 27,
+      "expected_skills_count": 12,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 469,
+        "skills": 459,
+        "qgen": 164
+      }
+    },
+    {
+      "id": "jd_036",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.5882,
+      "recall": 0.6667,
+      "f1": 0.625,
+      "support_rate": 1,
+      "pred_skills_count": 17,
+      "expected_skills_count": 15,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 425,
+        "skills": 415,
+        "qgen": 119
+      }
+    },
+    {
+      "id": "jd_037",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.625,
+      "recall": 0.9091,
+      "f1": 0.7407,
+      "support_rate": 1,
+      "pred_skills_count": 16,
+      "expected_skills_count": 11,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 408,
+        "skills": 398,
+        "qgen": 113
+      }
+    },
+    {
+      "id": "jd_038",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.6842,
+      "recall": 0.8125,
+      "f1": 0.7429,
+      "support_rate": 1,
+      "pred_skills_count": 19,
+      "expected_skills_count": 16,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 430,
+        "skills": 420,
+        "qgen": 116
+      }
+    },
+    {
+      "id": "jd_039",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.7273,
+      "recall": 0.7273,
+      "f1": 0.7273,
+      "support_rate": 1,
+      "pred_skills_count": 11,
+      "expected_skills_count": 11,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 411,
+        "skills": 401,
+        "qgen": 94
+      }
+    },
+    {
+      "id": "jd_040",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.3684,
+      "recall": 0.5385,
+      "f1": 0.4375,
+      "support_rate": 1,
+      "pred_skills_count": 19,
+      "expected_skills_count": 13,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 446,
+        "skills": 437,
+        "qgen": 128
+      }
+    },
+    {
+      "id": "jd_041",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.3889,
+      "recall": 0.7,
+      "f1": 0.5,
+      "support_rate": 1,
+      "pred_skills_count": 18,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 410,
+        "skills": 400,
+        "qgen": 124
+      }
+    },
+    {
+      "id": "jd_042",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.25,
+      "recall": 0.4545,
+      "f1": 0.3226,
+      "support_rate": 1,
+      "pred_skills_count": 20,
+      "expected_skills_count": 11,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 461,
+        "skills": 451,
+        "qgen": 141
+      }
+    },
+    {
+      "id": "jd_043",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.45,
+      "recall": 0.75,
+      "f1": 0.5625,
+      "support_rate": 1,
+      "pred_skills_count": 20,
+      "expected_skills_count": 12,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 428,
+        "skills": 418,
+        "qgen": 142
+      }
+    },
+    {
+      "id": "jd_044",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.3529,
+      "recall": 0.6,
+      "f1": 0.4444,
+      "support_rate": 1,
+      "pred_skills_count": 17,
+      "expected_skills_count": 10,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 426,
+        "skills": 416,
+        "qgen": 134
+      }
+    },
+    {
+      "id": "jd_045",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.4,
+      "recall": 0.6667,
+      "f1": 0.5,
+      "support_rate": 1,
+      "pred_skills_count": 20,
+      "expected_skills_count": 12,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 447,
+        "skills": 437,
+        "qgen": 149
+      }
+    },
+    {
+      "id": "jd_046",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.5,
+      "recall": 0.6875,
+      "f1": 0.5789,
+      "support_rate": 1,
+      "pred_skills_count": 22,
+      "expected_skills_count": 16,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 433,
+        "skills": 423,
+        "qgen": 144
+      }
+    },
+    {
+      "id": "jd_047",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.3,
+      "recall": 0.75,
+      "f1": 0.4286,
+      "support_rate": 1,
+      "pred_skills_count": 20,
+      "expected_skills_count": 8,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 470,
+        "skills": 460,
+        "qgen": 145
+      }
+    },
+    {
+      "id": "jd_048",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.5263,
+      "recall": 0.6667,
+      "f1": 0.5882,
+      "support_rate": 1,
+      "pred_skills_count": 19,
+      "expected_skills_count": 15,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 478,
+        "skills": 468,
+        "qgen": 129
+      }
+    },
+    {
+      "id": "jd_049",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.1029,
+      "recall": 0.6364,
+      "f1": 0.1772,
+      "support_rate": 0.8971,
+      "pred_skills_count": 68,
+      "expected_skills_count": 11,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 419,
+        "skills": 409,
+        "qgen": 147
+      }
+    },
+    {
+      "id": "jd_050",
+      "intent": "INGEST_JD",
+      "intent_correct": true,
+      "precision": 0.1538,
+      "recall": 0.8333,
+      "f1": 0.2597,
+      "support_rate": 0.8308,
+      "pred_skills_count": 65,
+      "expected_skills_count": 12,
+      "questions_count": 10,
+      "token_estimate": {
+        "router": 401,
+        "skills": 391,
+        "qgen": 157
+      }
+    }
+  ]
+}

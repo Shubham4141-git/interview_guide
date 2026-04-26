@@ -27,7 +27,26 @@
 
       <section class="workspace">
         <div class="chat-panel">
-          <div class="chat-stream" id="chat-stream"></div>
+          <div class="chat-stream" id="chat-stream">
+            <div class="empty-state" id="empty-state">
+              <p class="empty-state__heading">How do you want to prepare?</p>
+              <p class="empty-state__sub">Paste a job description to get tailored questions, or pick a topic to drill specific skills.</p>
+              <div class="empty-state__options">
+                <button
+                  class="empty-state__opt"
+                  type="button"
+                  data-fill="Generate 5 interview questions on system design"
+                >
+                  <span class="empty-state__opt-title">Ask by topic</span>
+                  <span class="empty-state__opt-sub">System design · Python · Kubernetes · SQL · any skill</span>
+                </button>
+                <button class="empty-state__opt" type="button" data-fill="">
+                  <span class="empty-state__opt-title">Paste a job description</span>
+                  <span class="empty-state__opt-sub">We'll extract the skills and generate tailored questions automatically</span>
+                </button>
+              </div>
+            </div>
+          </div>
 
           <form class="composer" data-form>
             <div class="composer__surface" data-composer>
@@ -60,7 +79,7 @@
             </select>
             <span class="user-hint">Use unique IDs to keep sessions separate.</span>
           </div>
-          <div class="insight-card" id="profile-card">
+          <div class="insight-card" id="profile-card" tabindex="0" role="button" aria-haspopup="dialog" aria-controls="profile-modal">
             <h3>Profile Snapshot</h3>
             <div class="insight-content" data-profile>Run an evaluation to see insights.</div>
           </div>
@@ -79,8 +98,24 @@
       </div>
     </template>
 
+    <div class="profile-modal" id="profile-modal" hidden>
+      <div class="profile-modal__backdrop" data-profile-close></div>
+      <div
+        class="profile-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="profile-dashboard-title"
+      >
+        <button class="profile-modal__close" type="button" data-profile-close aria-label="Close profile dashboard">
+          Close
+        </button>
+        <div class="profile-dashboard" data-profile-dashboard></div>
+      </div>
+    </div>
+
     <script>
-      const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+      const localHosts = new Set(["localhost", "127.0.0.1", "::1", "[::1]", "::", "[::]"]);
+      const isLocal = localHosts.has(window.location.hostname);
       window.API_BASE_URL = isLocal
         ? "http://localhost:8000"
         : "https://interview-guide-1-a7hgazcrcrehfnfb.canadacentral-01.azurewebsites.net";

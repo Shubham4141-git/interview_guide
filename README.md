@@ -11,6 +11,7 @@ Interview Guide is a comprehensive platform designed to streamline the interview
 - Profile tracking to monitor improvement over time
 - Multi-user support with user preferences management
 - Clean FastAPI backend for custom UI integration
+- Standalone frontend with inline question cards, batch answer evaluation, long-JD friendly composer, and a clickable profile dashboard
 
 ## Architecture
 The backend is located inside `backend/`, with core modules under `backend/src/interview_guide/`:
@@ -54,6 +55,7 @@ To launch the FastAPI backend (which powers the UI), run:
 
 ```bash
 cd backend
+uv run uvicorn api_server:app --reload --host 127.0.0.1 --port 8000
 ```
 
 `api_server.py` ensures the `src/` directory is on `PYTHONPATH`, so no extra configuration is required. Once running, all endpoints are available under `http://localhost:8000/api`.
@@ -76,7 +78,23 @@ cd frontend
 python3 -m http.server 4173
 ```
 
-Then visit `http://localhost:4173` in your browser while the backend is running on `http://localhost:8000`. The UI calls `/api/agent/execute` by default; adjust `window.API_BASE_URL` in `frontend/index.html` if you host the API elsewhere.
+Then visit `http://127.0.0.1:4173` in your browser while the backend is running on `http://localhost:8000`.
+
+Local hostnames supported by the frontend include:
+
+- `http://127.0.0.1:4173`
+- `http://localhost:4173`
+- IPv6 local variants such as `http://[::]:4173`
+
+The UI auto-targets the local backend when opened on a local hostname. If you host the API elsewhere, adjust `window.API_BASE_URL` in `frontend/index.html`.
+
+Current frontend behaviors:
+
+- Long pasted JDs stay inside a capped composer with internal scrolling instead of expanding across the page
+- Long user messages in the chat are collapsed with `Show more` / `Show less`
+- Generated questions render as answer cards
+- Answers are saved card by card and evaluated only when the user clicks `Evaluate submitted answers`
+- `Profile Snapshot` opens a dashboard view with summary KPIs, a radar chart, distribution bars, strengths, focus areas, and recent feedback
 
 ## Example Usage
 
@@ -120,6 +138,24 @@ Power-tool endpoints remain available for admin or automation workflows. Their i
 - `GET /api/sessions/{id}/questions`
 - `GET /api/users`
 - `GET /api/users/{user_id}`
+
+### Frontend Walkthrough
+
+Typical standalone UI flow:
+
+1. Start the backend on port `8000`
+2. Serve `frontend/` on port `4173`
+3. Enter a topic or paste a full JD
+4. Review the generated questions
+5. Save answers on the question cards one by one
+6. Click `Evaluate submitted answers` to score only the answers you submitted
+7. Open `Profile Snapshot` to view the dashboard and progress summary
+
+Notes:
+
+- Auto-recommended resources are shown only when the current evaluated batch includes low-scoring answers
+- If you answer only part of a question set, only those submitted answers are evaluated; unanswered cards remain available
+- Use different user IDs in the sidebar if multiple people are testing the same local instance
 
 ## Deployment
 

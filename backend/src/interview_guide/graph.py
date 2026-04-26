@@ -129,6 +129,8 @@ _SOFT_SKILL_STOPWORDS = {
     "prioritisation",
 }
 
+_AUTO_RECOMMEND_MAX_SCORE = 3
+
 def _filter_questions_by_skill_terms(
     questions: list[Dict[str, Any]],
     skills: list[str],
@@ -261,6 +263,46 @@ def _normalize_prefs(p):
             out["sources"] = sources
         return out
     return {}
+
+
+def _auto_recommendation_targets(
+    scores: List[Dict[str, Any]],
+    fallback_skill: str = "",
+) -> List[str]:
+    """Return low-scoring skills from the current evaluation only."""
+    buckets: Dict[str, Dict[str, float]] = {}
+    for score_item in scores or []:
+        try:
+            score = int(score_item.get("score", 0))
+        except Exception:
+            continue
+        if score > _AUTO_RECOMMEND_MAX_SCORE:
+            continue
+
+        raw_skill = (
+            score_item.get("skill")
+            or score_item.get("question_text")
+            or fallback_skill
+        )
+        skill = str(raw_skill).strip() if raw_skill else ""
+        if not skill:
+            continue
+
+        bucket = buckets.setdefault(skill, {"sum": 0.0, "count": 0.0, "worst": 5.0})
+        bucket["sum"] += float(score)
+        bucket["count"] += 1.0
+        bucket["worst"] = min(bucket["worst"], float(score))
+
+    ranked = sorted(
+        buckets.items(),
+        key=lambda item: (
+            item[1]["sum"] / max(item[1]["count"], 1.0),
+            item[1]["worst"],
+            -item[1]["count"],
+            item[0].lower(),
+        ),
+    )
+    return [skill for skill, _ in ranked]
 
 class GraphState(TypedDict, total=False):
     user_id: Optional[str]
@@ -506,6 +548,14 @@ def evaluate_answers(state: GraphState) -> GraphState:
     slots = state.get("slots", {}) or {}
     try:
         scores = evaluate_from_slots(slots)
+        question_texts = slots.get("question_texts") or []
+        if isinstance(question_texts, (list, tuple)):
+            for i, s in enumerate(scores):
+                if i < len(question_texts):
+                    question_text = str(question_texts[i] or "").strip()
+                    if question_text and not s.get("question_text"):
+                        s["question_text"] = question_text
+
         # If user provided indices of the questions they answered, attach question text
         qidxs = slots.get("question_indices") or slots.get("qidx") or []
         try:
@@ -521,7 +571,7 @@ def evaluate_answers(state: GraphState) -> GraphState:
                     for i, s in enumerate(scores):
                         if i < len(qidxs):
                             idx = qidxs[i]
-                            if 1 <= idx <= len(qs):
+                            if 1 <= idx <= len(qs) and not s.get("question_text"):
                                 s["question_text"] = qs[idx - 1]["text"]
                 except Exception:
                     pass
@@ -626,23 +676,29 @@ def show_profile(state: GraphState) -> GraphState:
     )
     state["auto_chain_from_eval"] = auto_chain_from_eval
 
-    # Auto-set the focus skill for downstream recommendations if none provided.
     focus_skill = weak[0] if weak else None
-    if focus_skill and not slots.get("skill"):
-        slots.setdefault("prefs", slots.get("prefs") or {})
-        slots["skill"] = focus_skill
-        state["slots"] = slots
 
     if auto_chain_from_eval:
-        if weak:
+        current_eval_targets = _auto_recommendation_targets(
+            state.get("scores") or [],
+            slots.get("topic") or "",
+        )
+        if current_eval_targets:
+            slots = dict(slots)
+            slots["skill"] = current_eval_targets[0]
+            state["slots"] = slots
             state["skip_recommendations"] = False
         else:
-            if "skill" in slots and not focus_skill:
+            if "skill" in slots:
                 slots = dict(slots)
                 slots.pop("skill", None)
                 state["slots"] = slots
             state["skip_recommendations"] = True
     else:
+        if focus_skill and not slots.get("skill"):
+            slots = dict(slots)
+            slots["skill"] = focus_skill
+            state["slots"] = slots
         state.pop("skip_recommendations", None)
         state.pop("auto_chain_from_eval", None)
     return state
